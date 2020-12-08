@@ -114,7 +114,7 @@ public:
      *   /return list of operator overload methods that meet the
      *   query criteria
      */
-    AbstractMetaFunctionCList operatorOverloads(OperatorQueryOptions query = OperatorQueryOption::AllOperators) const;
+    AbstractMetaFunctionCList operatorOverloads(OperatorQueryOptions query) const;
 
     bool hasArithmeticOperatorOverload() const;
     bool hasBitwiseOperatorOverload() const;

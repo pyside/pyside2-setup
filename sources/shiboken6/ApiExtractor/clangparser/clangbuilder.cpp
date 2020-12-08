@@ -1235,13 +1235,25 @@ bool Builder::endToken(const CXCursor &cursor)
         break;
     case CXCursor_Constructor:
         d->qualifyConstructor(cursor);
-        d->m_currentFunction.clear();
+        if (!d->m_currentFunction.isNull()) {
+            d->m_currentFunction->_determineType();
+            d->m_currentFunction.clear();
+        }
         break;
     case CXCursor_Destructor:
     case CXCursor_CXXMethod:
     case CXCursor_FunctionDecl:
     case CXCursor_FunctionTemplate:
-        d->m_currentFunction.clear();
+        if (!d->m_currentFunction.isNull()) {
+            d->m_currentFunction->_determineType();
+            d->m_currentFunction.clear();
+        }
+        break;
+    case CXCursor_ConversionFunction:
+        if (!d->m_currentFunction.isNull()) {
+            d->m_currentFunction->setFunctionType(CodeModel::ConversionOperator);
+            d->m_currentFunction.clear();
+        }
         break;
     case CXCursor_Namespace:
         d->popScope();

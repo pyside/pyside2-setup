@@ -63,11 +63,7 @@ enum class OperatorQueryOption {
     LogicalOp      = 0x08, // Logical: !, &&, ||
     ConversionOp   = 0x10, // Conversion: operator [const] TYPE()
     SubscriptionOp = 0x20, // Subscription: []
-    AssignmentOp   = 0x40, // Assignment: =
-    OtherOp        = 0x80, // The remaining operators: call(), etc
-    AllOperators   = ArithmeticOp | BitwiseOp | ComparisonOp
-                    | LogicalOp | ConversionOp | SubscriptionOp
-                    | AssignmentOp | OtherOp
+    AssignmentOp   = 0x40 // Assignment: =
 };
 
 Q_DECLARE_FLAGS(OperatorQueryOptions, OperatorQueryOption)

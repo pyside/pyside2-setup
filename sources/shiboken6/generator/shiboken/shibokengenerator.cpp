@@ -1364,13 +1364,10 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
 {
     StringStream s(TextStream::Language::Cpp);
     // The actual function
-    if (!(func->isEmptyFunction() ||
-          func->isNormal() ||
-          func->isSignal())) {
-        options |= Generator::SkipReturnType;
-    } else {
+    if (func->isEmptyFunction() || func->needsReturnType())
         s << functionReturnType(func, options) << ' ';
-    }
+    else
+        options |= Generator::SkipReturnType;
 
     // name
     QString name(func->originalName());
@@ -2219,14 +2216,13 @@ static bool isGroupable(const AbstractMetaFunctionCPtr &func)
     case AbstractMetaFunction::SignalFunction:
     case AbstractMetaFunction::GetAttroFunction:
     case AbstractMetaFunction::SetAttroFunction:
+    case AbstractMetaFunction::ArrowOperator: // weird operator overloads
+    case AbstractMetaFunction::SubscriptOperator:
         return false;
     default:
         break;
     }
     if (func->isModifiedRemoved() && !func->isAbstract())
-        return false;
-    // weird operator overloads
-    if (func->name() == QLatin1String("operator[]") || func->name() == QLatin1String("operator->"))  // FIXME: what about cast operators?
         return false;
     return true;
 }

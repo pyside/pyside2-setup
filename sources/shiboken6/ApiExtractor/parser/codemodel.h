@@ -43,6 +43,8 @@
 #include <QtCore/QStringList>
 #include <QtCore/QList>
 
+#include <optional>
+
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 #define DECLARE_MODEL_NODE(k) \
@@ -70,7 +72,19 @@ public:
         MoveConstructor,
         Destructor,
         Signal,
-        Slot
+        Slot,
+        AssignmentOperator,
+        CallOperator,
+        ConversionOperator,
+        DereferenceOperator, // Iterator's operator *
+        ReferenceOperator, // operator &
+        ArrowOperator,
+        ArithmeticOperator,
+        BitwiseOperator,
+        LogicalOperator,
+        ShiftOperator,
+        SubscriptOperator,
+        ComparisonOperator
     };
     Q_ENUM(FunctionType)
 
@@ -190,7 +204,7 @@ public:
 
     ClassList classes() const { return m_classes; }
     EnumList enums() const { return m_enums; }
-    inline FunctionList functions() const { return m_functions; }
+    inline const FunctionList &functions() const { return m_functions; }
     TypeDefList typeDefs() const { return m_typeDefs; }
     TemplateTypeAliasList templateTypeAliases() const { return m_templateTypeAliases; }
     VariableList variables() const { return m_variables; }
@@ -455,6 +469,8 @@ public:
     CodeModel::FunctionType functionType() const;
     void setFunctionType(CodeModel::FunctionType functionType);
 
+    static std::optional<CodeModel::FunctionType> functionTypeFromName(QStringView name);
+
     bool isDeleted() const;
     void setDeleted(bool d);
 
@@ -495,11 +511,16 @@ public:
 
     QString typeSystemSignature() const; // For dumping out type system files
 
+    // Private, for usage by the clang builder.
+    void _determineType();
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
 
 private:
+    CodeModel::FunctionType _determineTypeHelper() const;
+
     ArgumentList m_arguments;
     CodeModel::FunctionType m_functionType;
     union {

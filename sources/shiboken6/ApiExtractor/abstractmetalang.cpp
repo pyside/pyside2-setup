@@ -221,14 +221,7 @@ AbstractMetaFunctionCList AbstractMetaClass::operatorOverloads(OperatorQueryOpti
                                       | FunctionQueryOption::Visible);
     AbstractMetaFunctionCList returned;
     for (const auto &f : list) {
-        if ((query.testFlag(OperatorQueryOption::ArithmeticOp) && f->isArithmeticOperator())
-            || (query.testFlag(OperatorQueryOption::BitwiseOp) && f->isBitwiseOperator())
-            || (query.testFlag(OperatorQueryOption::ComparisonOp) && f->isComparisonOperator())
-            || (query.testFlag(OperatorQueryOption::LogicalOp) && f->isLogicalOperator())
-            || (query.testFlag(OperatorQueryOption::SubscriptionOp) && f->isSubscriptOperator())
-            || (query.testFlag(OperatorQueryOption::AssignmentOp) && f->isAssignmentOperator())
-            || (query.testFlag(OperatorQueryOption::ConversionOp) && f->isConversionOperator())
-            || (query.testFlag(OperatorQueryOption::OtherOp) && f->isOtherOperator()))
+        if (f->matches(query))
             returned += f;
     }
 
@@ -1094,6 +1087,22 @@ static void addExtraIncludesForFunction(AbstractMetaClass *metaClass,
         addExtraIncludeForType(metaClass, argument.type());
 }
 
+static bool addSuperFunction(const AbstractMetaFunctionCPtr &f)
+{
+    switch (f->functionType()) {
+    case AbstractMetaFunction::ConstructorFunction:
+    case AbstractMetaFunction::CopyConstructorFunction:
+    case AbstractMetaFunction::MoveConstructorFunction:
+    case AbstractMetaFunction::AssignmentOperatorFunction:
+    case AbstractMetaFunction::MoveAssignmentOperatorFunction:
+    case AbstractMetaFunction::DestructorFunction:
+        return false;
+    default:
+        break;
+    }
+    return true;
+}
+
 void AbstractMetaClass::fixFunctions()
 {
     if (d->m_functionsFixed)
@@ -1139,7 +1148,7 @@ void AbstractMetaClass::fixFunctions()
 
             // we generally don't care about private functions, but we have to get the ones that are
             // virtual in case they override abstract functions.
-            bool add = (sf->isNormal() || sf->isSignal() || sf->isEmptyFunction());
+            bool add = addSuperFunction(sf);
             for (const auto &cf : qAsConst(nonRemovedFuncs)) {
                 AbstractMetaFunctionPtr f(qSharedPointerConstCast<AbstractMetaFunction>(cf));
                 const AbstractMetaFunction::CompareResult cmp = cf->compareTo(sf.data());

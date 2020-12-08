@@ -29,6 +29,7 @@
 #ifndef ABSTRACTMETAFUNCTION_H
 #define ABSTRACTMETAFUNCTION_H
 
+#include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
 #include "abstractmetaargument.h"
 #include "abstractmetaattributes.h"
@@ -65,7 +66,20 @@ public:
         EmptyFunction,
         SlotFunction,
         GetAttroFunction,
-        SetAttroFunction
+        SetAttroFunction,
+        CallOperator,
+        FirstOperator = CallOperator,
+        ConversionOperator,
+        DereferenceOperator, // Iterator's operator *
+        ReferenceOperator, // operator &
+        ArrowOperator,
+        ArithmeticOperator,
+        BitwiseOperator,
+        LogicalOperator,
+        ShiftOperator,
+        SubscriptOperator,
+        ComparisonOperator,
+        LastOperator = ComparisonOperator
     };
     Q_ENUM(FunctionType)
 
@@ -135,12 +149,11 @@ public:
     bool isOperatorOverload() const;
 
     bool isArithmeticOperator() const;
-    bool isBitwiseOperator() const;
+    bool isBitwiseOperator() const; // Includes shift operator
     bool isComparisonOperator() const;
     bool isLogicalOperator() const;
     bool isSubscriptOperator() const;
     bool isAssignmentOperator() const; // Assignment or move assignment
-    bool isOtherOperator() const;
 
     /**
      * Informs the arity of the operator or -1 if the function is not
@@ -190,7 +203,7 @@ public:
     bool isDeprecated() const;
     bool isDestructor() const { return functionType() == DestructorFunction; }
     bool isConstructor() const;
-    bool isNormal() const;
+    bool needsReturnType() const;
     bool isInGlobalScope() const;
     bool isSignal() const { return functionType() == SignalFunction; }
     bool isSlot() const { return functionType() == SlotFunction; }
@@ -277,6 +290,8 @@ public:
 
     static AbstractMetaFunctionCPtr
         find(const AbstractMetaFunctionCList &haystack, const QString &needle);
+
+    bool matches(OperatorQueryOptions) const;
 
     // for the meta builder only
     void setAllowThreadModification(TypeSystem::AllowThread am);

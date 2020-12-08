@@ -103,7 +103,7 @@ public:
     void traverseFunctions(ScopeModelItem item, AbstractMetaClass *parent);
     void applyFunctionModifications(AbstractMetaFunction* func);
     void traverseFields(const ScopeModelItem &item, AbstractMetaClass *parent);
-    void traverseStreamOperator(const FunctionModelItem &functionItem,
+    bool traverseStreamOperator(const FunctionModelItem &functionItem,
                                 AbstractMetaClass *currentClass);
     void traverseOperatorFunction(const FunctionModelItem &item,
                                   AbstractMetaClass *currentClass);

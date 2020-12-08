@@ -31,6 +31,7 @@
 #include "abstractmetalang.h"
 #include "abstractmetalang_helpers.h"
 #include "abstractmetatype.h"
+#include <codemodel.h>
 #include "documentation.h"
 #include "messages.h"
 #include "modifications.h"
@@ -551,9 +552,18 @@ bool AbstractMetaFunction::isConstructor() const
             || d->m_functionType == MoveConstructorFunction;
 }
 
-bool AbstractMetaFunction::isNormal() const
+bool AbstractMetaFunction::needsReturnType() const
 {
-    return functionType() == NormalFunction || isSlot() || isInGlobalScope();
+    switch (d->m_functionType) {
+    case AbstractMetaFunction::ConstructorFunction:
+    case AbstractMetaFunction::CopyConstructorFunction:
+    case AbstractMetaFunction::MoveConstructorFunction:
+    case AbstractMetaFunction::DestructorFunction:
+        return false;
+    default:
+        break;
+    }
+    return true;
 }
 
 bool AbstractMetaFunction::isInGlobalScope() const
@@ -936,7 +946,7 @@ bool AbstractMetaFunction::generateExceptionHandling() const
 
 bool AbstractMetaFunction::isConversionOperator() const
 {
-    return isConversionOperator(originalName());
+    return d->m_functionType == ConversionOperator;
 }
 
 bool AbstractMetaFunction::isOperatorOverload(const QString &funcName)
@@ -955,90 +965,40 @@ bool AbstractMetaFunction::isOperatorOverload(const QString &funcName)
 
 bool AbstractMetaFunction::isOperatorOverload() const
 {
-    return isOperatorOverload(originalName());
+    return d->m_functionType == AssignmentOperatorFunction
+        || (d->m_functionType >= FirstOperator && d->m_functionType <= LastOperator);
 }
 
 bool AbstractMetaFunction::isArithmeticOperator() const
 {
-    if (!isOperatorOverload())
-        return false;
-
-    QString name = originalName();
-
-    // It's a dereference operator!
-    if (name == QLatin1String("operator*") && d->m_arguments.isEmpty())
-        return false;
-
-    return name == QLatin1String("operator+") || name == QLatin1String("operator+=")
-            || name == QLatin1String("operator-") || name == QLatin1String("operator-=")
-            || name == QLatin1String("operator*") || name == QLatin1String("operator*=")
-            || name == QLatin1String("operator/") || name == QLatin1String("operator/=")
-            || name == QLatin1String("operator%") || name == QLatin1String("operator%=")
-            || name == QLatin1String("operator++") || name == QLatin1String("operator--");
+    return d->m_functionType == ArithmeticOperator;
 }
 
 bool AbstractMetaFunction::isBitwiseOperator() const
 {
-    if (!isOperatorOverload())
-        return false;
-
-    QString name = originalName();
-    return name == QLatin1String("operator<<") || name == QLatin1String("operator<<=")
-            || name == QLatin1String("operator>>") || name == QLatin1String("operator>>=")
-            || name == QLatin1String("operator&") || name == QLatin1String("operator&=")
-            || name == QLatin1String("operator|") || name == QLatin1String("operator|=")
-            || name == QLatin1String("operator^") || name == QLatin1String("operator^=")
-            || name == QLatin1String("operator~");
+    return d->m_functionType == BitwiseOperator
+        || d->m_functionType == ShiftOperator;
 }
 
 bool AbstractMetaFunction::isComparisonOperator() const
 {
-    if (!isOperatorOverload())
-        return false;
-
-    QString name = originalName();
-    return name == QLatin1String("operator<") || name == QLatin1String("operator<=")
-            || name == QLatin1String("operator>") || name == QLatin1String("operator>=")
-            || name == QLatin1String("operator==") || name == QLatin1String("operator!=");
+    return d->m_functionType == ComparisonOperator;
 }
 
 bool AbstractMetaFunction::isLogicalOperator() const
 {
-    if (!isOperatorOverload())
-        return false;
-
-    QString name = originalName();
-    return name == QLatin1String("operator!")
-            || name == QLatin1String("operator&&")
-            || name == QLatin1String("operator||");
+    return d->m_functionType == LogicalOperator;
 }
 
 bool AbstractMetaFunction::isSubscriptOperator() const
 {
-    if (!isOperatorOverload())
-        return false;
-
-    return originalName() == QLatin1String("operator[]");
+    return d->m_functionType == SubscriptOperator;
 }
 
 bool AbstractMetaFunction::isAssignmentOperator() const
 {
     return d->m_functionType == AssignmentOperatorFunction
         || d->m_functionType == MoveAssignmentOperatorFunction;
-}
-
-bool AbstractMetaFunction::isOtherOperator() const
-{
-    if (!isOperatorOverload())
-        return false;
-
-    return !isArithmeticOperator()
-            && !isBitwiseOperator()
-            && !isComparisonOperator()
-            && !isLogicalOperator()
-            && !isConversionOperator()
-            && !isSubscriptOperator()
-            && !isAssignmentOperator();
 }
 
 int AbstractMetaFunction::arityOfOperator() const
@@ -1060,15 +1020,14 @@ int AbstractMetaFunction::arityOfOperator() const
 
 bool AbstractMetaFunction::isInplaceOperator() const
 {
-    if (!isOperatorOverload())
-        return false;
+    static const QSet<QStringView> inplaceOperators =
+    {
+        u"operator+=", u"operator&=", u"operator-=", u"operator|=",
+        u"operator*=", u"operator^=", u"operator/=", u"operator<<=",
+        u"operator%=", u"operator>>="
+    };
 
-    QString name = originalName();
-    return name == QLatin1String("operator+=") || name == QLatin1String("operator&=")
-           || name == QLatin1String("operator-=") || name == QLatin1String("operator|=")
-           || name == QLatin1String("operator*=") || name == QLatin1String("operator^=")
-           || name == QLatin1String("operator/=") || name == QLatin1String("operator<<=")
-           || name == QLatin1String("operator%=") || name == QLatin1String("operator>>=");
+    return isOperatorOverload() && inplaceOperators.contains(originalName());
 }
 
 bool AbstractMetaFunction::isVirtual() const
@@ -1105,6 +1064,38 @@ AbstractMetaFunction::find(const AbstractMetaFunctionCList &haystack,
             return f;
     }
     return {};
+}
+
+bool AbstractMetaFunction::matches(OperatorQueryOptions query) const
+{
+    bool result = false;
+    switch (d->m_functionType) {
+    case AbstractMetaFunction::AssignmentOperatorFunction:
+        result = query.testFlag(OperatorQueryOption::AssignmentOp);
+        break;
+    case AbstractMetaFunction::ConversionOperator:
+        result = query.testFlag(OperatorQueryOption::ConversionOp);
+        break;
+    case AbstractMetaFunction::ArithmeticOperator:
+        result = query.testFlag(OperatorQueryOption::ArithmeticOp);
+        break;
+    case AbstractMetaFunction::BitwiseOperator:
+    case AbstractMetaFunction::ShiftOperator:
+        result = query.testFlag(OperatorQueryOption::BitwiseOp);
+        break;
+    case AbstractMetaFunction::LogicalOperator:
+        result = query.testFlag(OperatorQueryOption::LogicalOp);
+        break;
+    case AbstractMetaFunction::SubscriptOperator:
+        result = query.testFlag(OperatorQueryOption::SubscriptionOp);
+        break;
+    case AbstractMetaFunction::ComparisonOperator:
+        result = query.testFlag(OperatorQueryOption::ComparisonOp);
+        break;
+    default:
+        break;
+    }
+    return result;
 }
 
 void AbstractMetaFunction::setAllowThreadModification(TypeSystem::AllowThread am)
@@ -1148,8 +1139,6 @@ TypeSystem::SnakeCase AbstractMetaFunction::snakeCase() const
     case AbstractMetaFunction::SignalFunction:
     case AbstractMetaFunction::EmptyFunction:
     case AbstractMetaFunction::SlotFunction:
-        if (isOperatorOverload())
-            return TypeSystem::SnakeCase::Disabled;
         break;
     default:
         return TypeSystem::SnakeCase::Disabled;

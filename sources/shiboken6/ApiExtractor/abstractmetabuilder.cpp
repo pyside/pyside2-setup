@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -284,7 +284,6 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
                 metaFunction->setArguments(arguments);
                 metaFunction->setReverseOperator(true);
             }
-            metaFunction->setFunctionType(AbstractMetaFunction::NormalFunction);
             metaFunction->setVisibility(AbstractMetaFunction::Public);
             metaFunction->setOriginalAttributes(metaFunction->attributes());
             setupFunctionDefaults(metaFunction, baseoperandClass);
@@ -296,57 +295,54 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     }
 }
 
-void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item,
+bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem &item,
                                                         AbstractMetaClass *currentClass)
 {
-    ArgumentList arguments = item->arguments();
-    if (arguments.size() == 2 && item->accessPolicy() == CodeModel::Public) {
-        AbstractMetaClass *streamClass = argumentToClass(arguments.at(0), currentClass);
-        AbstractMetaClass *streamedClass = argumentToClass(arguments.at(1), currentClass);
+    ArgumentList itemArguments = item->arguments();
+    if (itemArguments.size() != 2 || item->accessPolicy() != CodeModel::Public)
+        return false;
+    auto streamClass = argumentToClass(itemArguments.at(0), currentClass);
+    if (streamClass == nullptr || !streamClass->isStream())
+        return false;
+   auto streamedClass = argumentToClass(itemArguments.at(1), currentClass);
+   if (streamedClass == nullptr)
+       return false;
 
-        if (streamClass && streamedClass && (streamClass->isStream())) {
-            AbstractMetaFunction *streamFunction = traverseFunction(item, streamedClass);
+   AbstractMetaFunction *streamFunction = traverseFunction(item, streamedClass);
+   if (!streamFunction)
+       return false;
 
-            if (streamFunction) {
-                // Strip first argument, since that is the containing object
-                AbstractMetaArgumentList arguments = streamFunction->arguments();
-                if (!streamClass->typeEntry()->generateCode())
-                    arguments.takeLast();
-                else
-                    arguments.takeFirst();
+    // Strip first argument, since that is the containing object
+    AbstractMetaArgumentList arguments = streamFunction->arguments();
+    if (!streamClass->typeEntry()->generateCode())
+        arguments.takeLast();
+    else
+        arguments.takeFirst();
 
-                streamFunction->setArguments(arguments);
+    streamFunction->setArguments(arguments);
 
-                *streamFunction += AbstractMetaAttributes::FinalInTargetLang;
-                *streamFunction += AbstractMetaAttributes::Public;
-                streamFunction->setOriginalAttributes(streamFunction->attributes());
+    *streamFunction += AbstractMetaAttributes::FinalInTargetLang;
+    *streamFunction += AbstractMetaAttributes::Public;
+    streamFunction->setOriginalAttributes(streamFunction->attributes());
 
-//              streamFunction->setType(0);
+    AbstractMetaClass *funcClass;
 
-                AbstractMetaClass *funcClass;
-
-                if (!streamClass->typeEntry()->generateCode()) {
-                    AbstractMetaArgumentList reverseArgs = reverseList(streamFunction->arguments());
-                    streamFunction->setArguments(reverseArgs);
-                    streamFunction->setReverseOperator(true);
-                    funcClass = streamedClass;
-                } else {
-                    funcClass = streamClass;
-                }
-
-                setupFunctionDefaults(streamFunction, funcClass);
-                funcClass->addFunction(AbstractMetaFunctionCPtr(streamFunction));
-                if (funcClass == streamClass)
-                    funcClass->typeEntry()->addExtraInclude(streamedClass->typeEntry()->include());
-                else
-                    funcClass->typeEntry()->addExtraInclude(streamClass->typeEntry()->include());
-
-            } else {
-                delete streamFunction;
-            }
-
-        }
+    if (!streamClass->typeEntry()->generateCode()) {
+        AbstractMetaArgumentList reverseArgs = reverseList(streamFunction->arguments());
+        streamFunction->setArguments(reverseArgs);
+        streamFunction->setReverseOperator(true);
+        funcClass = streamedClass;
+    } else {
+        funcClass = streamClass;
     }
+
+    setupFunctionDefaults(streamFunction, funcClass);
+    funcClass->addFunction(AbstractMetaFunctionCPtr(streamFunction));
+    if (funcClass == streamClass)
+        funcClass->typeEntry()->addExtraInclude(streamedClass->typeEntry()->include());
+    else
+        funcClass->typeEntry()->addExtraInclude(streamClass->typeEntry()->include());
+    return true;
 }
 
 void AbstractMetaBuilderPrivate::sortLists()
@@ -542,39 +538,20 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     registerToStringCapabilityIn(dom);
 
-    {
-        FunctionList binaryOperators = dom->findFunctions(QStringLiteral("operator=="));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator!=")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator<=")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator>=")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator<")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator+")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator/")));
-        // Filter binary operators, skipping for example
-        // class Iterator { ... Value *operator*() ... };
-        const FunctionList potentiallyBinaryOperators =
-            dom->findFunctions(QStringLiteral("operator*"))
-            + dom->findFunctions(QStringLiteral("operator&"));
-        for (const FunctionModelItem &item : potentiallyBinaryOperators) {
-            if (!item->arguments().isEmpty())
-                binaryOperators.append(item);
+    for (const auto &func : dom->functions()) {
+        switch (func->functionType()) {
+        case CodeModel::ComparisonOperator:
+        case CodeModel::ArithmeticOperator:
+        case CodeModel::BitwiseOperator:
+        case CodeModel::LogicalOperator:
+            traverseOperatorFunction(func, nullptr);
+            break;
+        case CodeModel::ShiftOperator:
+            if (!traverseStreamOperator(func, nullptr))
+                traverseOperatorFunction(func, nullptr);
+        default:
+            break;
         }
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator-")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator&")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator|")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator^")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator~")));
-        binaryOperators.append(dom->findFunctions(QStringLiteral("operator>")));
-
-        for (const FunctionModelItem &item : qAsConst(binaryOperators))
-            traverseOperatorFunction(item, nullptr);
-    }
-
-    {
-        const FunctionList streamOperators = dom->findFunctions(QLatin1String("operator<<"))
-            + dom->findFunctions(QLatin1String("operator>>"));
-        for (const FunctionModelItem &item : streamOperators)
-            traverseStreamOperator(item, nullptr);
     }
 
     ReportHandler::startProgress("Checking inconsistencies in function modifications...");
@@ -1553,12 +1530,13 @@ static void applyDefaultExpressionModifications(const FunctionModificationList &
     }
 }
 
+static AbstractMetaFunction::FunctionType functionTypeFromName(const QString &);
+
 bool AbstractMetaBuilderPrivate::traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc)
 {
     AbstractMetaFunction *metaFunction = traverseAddedFunctionHelper(addedFunc);
     if (metaFunction == nullptr)
         return false;
-    metaFunction->setFunctionType(AbstractMetaFunction::NormalFunction);
     m_globalFunctions << AbstractMetaFunctionCPtr(metaFunction);
     return true;
 }
@@ -1581,6 +1559,7 @@ AbstractMetaFunction *
 
     auto metaFunction = new AbstractMetaFunction(addedFunc);
     metaFunction->setType(returnType.value());
+    metaFunction->setFunctionType(functionTypeFromName(addedFunc->name()));
 
     const auto &args = addedFunc->arguments();
 
@@ -1666,13 +1645,6 @@ bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunction
             if (te->name() == metaFunction->name())
                 metaFunction->setFunctionType(AbstractMetaFunction::CopyConstructorFunction);
         }
-    } else {
-        auto type = AbstractMetaFunction::NormalFunction;
-        if (metaFunction->name() == QLatin1String("__getattro__"))
-            type = AbstractMetaFunction::GetAttroFunction;
-        else if (metaFunction->name() == QLatin1String("__setattro__"))
-            type = AbstractMetaFunction::SetAttroFunction;
-        metaFunction->setFunctionType(type);
     }
 
     metaFunction->setDeclaringClass(metaClass);
@@ -1733,6 +1705,42 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
     case CodeModel::Destructor:
         result = AbstractMetaFunction::DestructorFunction;
         break;
+    case CodeModel::AssignmentOperator:
+        result = AbstractMetaFunction::AssignmentOperatorFunction;
+        break;
+    case CodeModel::CallOperator:
+        result = AbstractMetaFunction::CallOperator;
+        break;
+    case CodeModel::ConversionOperator:
+        result = AbstractMetaFunction::ConversionOperator;
+        break;
+    case CodeModel::DereferenceOperator:
+        result = AbstractMetaFunction::DereferenceOperator;
+        break;
+    case CodeModel::ReferenceOperator:
+        result = AbstractMetaFunction::ReferenceOperator;
+        break;
+    case CodeModel::ArrowOperator:
+        result = AbstractMetaFunction::ArrowOperator;
+        break;
+    case CodeModel::ArithmeticOperator:
+        result = AbstractMetaFunction::ArithmeticOperator;
+        break;
+    case CodeModel::BitwiseOperator:
+        result = AbstractMetaFunction::BitwiseOperator;
+        break;
+    case CodeModel::LogicalOperator:
+        result = AbstractMetaFunction::LogicalOperator;
+        break;
+    case CodeModel::ShiftOperator:
+        result = AbstractMetaFunction::ShiftOperator;
+        break;
+    case CodeModel::SubscriptOperator:
+        result = AbstractMetaFunction::SubscriptOperator;
+        break;
+    case CodeModel::ComparisonOperator:
+        result = AbstractMetaFunction::ComparisonOperator;
+        break;
     case CodeModel::Normal:
         break;
     case CodeModel::Signal:
@@ -1743,6 +1751,18 @@ static inline AbstractMetaFunction::FunctionType functionTypeFromCodeModel(CodeM
         break;
     }
     return result;
+}
+
+static AbstractMetaFunction::FunctionType functionTypeFromName(const QString &name)
+{
+    if (name == u"__getattro__")
+        return AbstractMetaFunction::GetAttroFunction;
+    if (name == u"__setattro__")
+        return AbstractMetaFunction::SetAttroFunction;
+    const auto typeOpt = _FunctionModelItem::functionTypeFromName(name);
+    if (typeOpt.has_value())
+        return functionTypeFromCodeModel(typeOpt.value());
+    return AbstractMetaFunction::NormalFunction;
 }
 
 // Apply the <array> modifications of the arguments

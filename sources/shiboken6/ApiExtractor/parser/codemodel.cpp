@@ -34,6 +34,7 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
+#include <QtCore/QRegularExpression>
 
 #include <algorithm>
 #include <functional>
@@ -901,6 +902,104 @@ QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type
     }
     str << ')';
     return result;
+}
+
+using NameFunctionTypeHash = QHash<QStringView, CodeModel::FunctionType>;
+
+static const NameFunctionTypeHash &nameToOperatorFunction()
+{
+    static const NameFunctionTypeHash result = {
+        {u"operator=",   CodeModel::AssignmentOperator},
+        {u"operator+",   CodeModel::ArithmeticOperator},
+        {u"operator+=",  CodeModel::ArithmeticOperator},
+        {u"operator-",   CodeModel::ArithmeticOperator},
+        {u"operator-=",  CodeModel::ArithmeticOperator},
+        {u"operator*",   CodeModel::ArithmeticOperator},
+        {u"operator*=",  CodeModel::ArithmeticOperator},
+        {u"operator/",   CodeModel::ArithmeticOperator},
+        {u"operator/=",  CodeModel::ArithmeticOperator},
+        {u"operator%",   CodeModel::ArithmeticOperator},
+        {u"operator%=",  CodeModel::ArithmeticOperator},
+        {u"operator++",  CodeModel::ArithmeticOperator},
+        {u"operator--",  CodeModel::ArithmeticOperator},
+        {u"operator&",   CodeModel::BitwiseOperator},
+        {u"operator&=",  CodeModel::BitwiseOperator},
+        {u"operator|",   CodeModel::BitwiseOperator},
+        {u"operator|=",  CodeModel::BitwiseOperator},
+        {u"operator^",   CodeModel::BitwiseOperator},
+        {u"operator^=",  CodeModel::BitwiseOperator},
+        {u"operator~",   CodeModel::BitwiseOperator},
+        {u"operator<<",  CodeModel::ShiftOperator},
+        {u"operator<<=", CodeModel::ShiftOperator},
+        {u"operator>>",  CodeModel::ShiftOperator},
+        {u"operator>>=", CodeModel::ShiftOperator},
+        {u"operator<",   CodeModel::ComparisonOperator},
+        {u"operator<=",  CodeModel::ComparisonOperator},
+        {u"operator>",   CodeModel::ComparisonOperator},
+        {u"operator>=",  CodeModel::ComparisonOperator},
+        {u"operator==",  CodeModel::ComparisonOperator},
+        {u"operator!=",  CodeModel::ComparisonOperator},
+        {u"operator!",   CodeModel::LogicalOperator},
+        {u"operator&&",  CodeModel::LogicalOperator},
+        {u"operator||",  CodeModel::LogicalOperator},
+        {u"operator[]",  CodeModel::SubscriptOperator},
+        {u"operator()",  CodeModel::CallOperator}, // Can be void
+        {u"operator->",  CodeModel::ArrowOperator}
+    };
+    return result;
+}
+
+std::optional<CodeModel::FunctionType> _FunctionModelItem::functionTypeFromName(QStringView name)
+{
+    const auto it = nameToOperatorFunction().constFind(name);
+    if (it != nameToOperatorFunction().constEnd())
+        return it.value();
+    // This check is only for added functions. Clang detects this
+    // by cursor type  CXCursor_ConversionFunction.
+    if (name.startsWith(u"operator "))
+        return CodeModel::ConversionOperator;
+    return {};
+}
+
+// Check for operators, etc. unless it is a specific type like a constructor
+CodeModel::FunctionType _FunctionModelItem::_determineTypeHelper() const
+{
+    switch (m_functionType) {
+    case CodeModel::Constructor:
+    case CodeModel::CopyConstructor:
+    case CodeModel::MoveConstructor:
+    case CodeModel::Destructor:
+    case CodeModel::Signal:
+    case CodeModel::Slot:
+        return m_functionType; // nothing to do here
+    default:
+        break;
+    }
+    const QString &functionName = name();
+    const auto newTypeOpt = _FunctionModelItem::functionTypeFromName(functionName);
+    if (!newTypeOpt.has_value())
+        return m_functionType;
+
+    auto newType = newTypeOpt.value();
+    // It's some sort of dereference operator?!
+    if (m_arguments.isEmpty()) {
+        switch (newType) {
+        case CodeModel::ArithmeticOperator:
+            if (functionName == u"operator*")
+                return CodeModel::DereferenceOperator;
+        case CodeModel::BitwiseOperator:
+            if (functionName == u"operator&")
+                return CodeModel::ReferenceOperator;
+        default:
+            break;
+        }
+    }
+    return newType;
+}
+
+void _FunctionModelItem::_determineType()
+{
+    m_functionType = _determineTypeHelper();
 }
 
 #ifndef QT_NO_DEBUG_STREAM
