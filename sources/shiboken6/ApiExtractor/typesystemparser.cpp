@@ -2100,12 +2100,8 @@ bool TypeSystemParser::parseModifyField(const QXmlStreamReader &reader,
         } else if (name == removeAttribute()) {
             fm.setRemoved(convertRemovalAttribute(attributes->takeAt(i).value()));
         }  else if (name == readAttribute()) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             fm.setReadable(convertBoolean(attributes->takeAt(i).value(), readAttribute(), true));
         } else if (name == writeAttribute()) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgUnimplementedAttributeWarning(reader, name)));
             fm.setWritable(convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true));
         } else if (name == renameAttribute()) {
             fm.setRenamedToName(attributes->takeAt(i).value().toString());
