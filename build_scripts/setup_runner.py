@@ -93,7 +93,7 @@ class SetupRunner(object):
             command = self.sub_argv[1]
 
         # Add --reuse-build option if requested and not already present.
-        if (reuse_build and command != 'clean'
+        if (reuse_build and command in ('bdist_wheel', 'build', 'build_rst_docs', 'install')
             and not self.cmd_line_argument_is_in_args("reuse-build", self.sub_argv)):
             setup_cmd.append(self.construct_cmd_line_argument("reuse-build"))
         self.invocations_list.append(setup_cmd)
