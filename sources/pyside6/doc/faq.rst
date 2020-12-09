@@ -5,13 +5,14 @@
 Frequently Asked Questions
 ==========================
 
-**When did The Qt Company adopt PySide6?**
+**When did The Qt Company adopt PySide?**
   In April 2016 `The Qt Company <https://qt.io>`_ decided to properly support the port. For more
   information, see `<https://groups.google.com/forum/#!topic/pyside-dev/pqwzngAGLWE>`_.
 
-**Why use PySide6 and not PySide?**
-  Since PySide was developed for Qt 4, we now use PySide6 to imply that it is for a newer version,
-  after it was ported to support Qt 5.
+**Why use PySide6 and not PySide, or PySide2?**
+  The PySide Python module was developed for Qt 4 and PySide2 adapts
+  the same for Qt 5. From Qt 6 onwards, the module name changes to PySide6,
+  indicating the Qt version it supports.
 
 **Where I can find information about the old PySide project?**
   The project's old wiki page is available on PySide, but the project is now deprecated and not

@@ -6,7 +6,7 @@
     **Qt for Python** offers the official Python bindings for `Qt`_, and
     has two main components:
 
-    * `PySide6`_, so that you can use Qt5 APIs in your Python applications, and
+    * `PySide6`_, so that you can use Qt6 APIs in your Python applications, and
     * `Shiboken6 <shiboken6/index.html>`__, a binding generator tool, which can
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.
@@ -16,7 +16,7 @@
     **Qt for Python** offers the official Python bindings for `Qt`_, and
     has two main components:
 
-    * `PySide6`_, so that you can use Qt5 APIs in your Python applications, and
+    * `PySide6`_, so that you can use Qt6 APIs in your Python applications, and
     * `Shiboken6 <../shiboken6/index.html>`__, a binding generator tool, which can
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.

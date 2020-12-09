@@ -4,7 +4,7 @@ Getting Started on Linux
 Requirements
 ------------
 
- * Qt package from `here`_ or a custom build of Qt 5.12+ (preferably 5.15)
+ * Qt package from `here`_ or a custom build of Qt (preferably 6.0)
  * A Python interpreter (version Python 3.6+).
    You can either use the one provided by your OS, or get it
    from the `official website`_.
@@ -12,7 +12,7 @@ Requirements
  * `CMake`_  version 3.1 or greater
  * Git version 2 or greater
  * `libclang`_ from your system or the prebuilt version from the ``Qt Downloads`` page is
-   recommended. libclang10 is required for PySide 5.15.
+   recommended. libclang10 is required for 6.0+.
  * ``sphinx`` package for the documentation (optional).
  * Depending on your linux distribution, the following dependencies might also be required:
 
@@ -55,42 +55,42 @@ environment variables::
     7z x libclang-release_100-based-linux-Rhel7.6-gcc5.3-x86_64.7z
     export CLANG_INSTALL_DIR=$PWD/libclang
 
-Getting PySide6
-~~~~~~~~~~~~~~~
+Getting PySide
+~~~~~~~~~~~~~~
 
 Cloning the official repository can be done by::
 
     git clone --recursive https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, e.g. 5.15::
+Checking out the version that we want to build, for example 6.0::
 
-    cd pyside-setup && git checkout 5.15
+    cd pyside-setup && git checkout 6.0
 
 .. note:: Keep in mind you need to use the same version as your Qt installation.
-          Additionally, ``git checkout -b 5.15  --track origin/5.14`` could be a better option
+          Additionally, ``git checkout -b 6.0  --track origin/6.0`` could be a better option
           in case you want to work on it.
 
-Building PySide6
-~~~~~~~~~~~~~~~~
+Building PySide
+~~~~~~~~~~~~~~~
 
-Check your Qt installation path, to specifically use that version of qmake to build PySide6.
-e.g. ``/opt/Qt/5.14.0/gcc_64/bin/qmake``.
+Check your Qt installation path, to specifically use that version of qmake to build PySide.
+for example, ``/opt/Qt/6.0.0/gcc_64/bin/qmake``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qmake=/opt/Qt/5.15.0/gcc_64/bin/qmake --build-tests --ignore-git --parallel=8
+    python setup.py build --qmake=/opt/Qt/6.0.0/gcc_64/bin/qmake --build-tests --ignore-git --parallel=8
 
-Installing PySide6
-~~~~~~~~~~~~~~~~~~
+Installing PySide
+~~~~~~~~~~~~~~~~~
 
 To install on the current directory, just run::
 
-    python setup.py install --qmake=/opt/Qt/5.15.0/gcc_64/bin/qmake --build-tests --ignore-git --parallel=8
+    python setup.py install --qmake=/opt/Qt/6.0.0/gcc_64/bin/qmake --build-tests --ignore-git --parallel=8
 
 Test installation
 ~~~~~~~~~~~~~~~~~
 
 You can execute one of the examples to verify the process is properly working.
-Remember to properly set the environment variables for Qt and PySide6::
+Remember to properly set the environment variables for Qt and PySide::
 
     python examples/widgets/widgets/tetrix.py

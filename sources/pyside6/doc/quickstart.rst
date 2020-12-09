@@ -32,11 +32,11 @@ From the terminal, run the following command::
     pip install PySide6
 
     # For a specific version
-    pip install PySide6==5.15.0
+    pip install PySide6==6.0
 
 or::
 
-    pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.15/latest pyside6 --trusted-host download.qt.io
+    pip install --index-url=http://download.qt.io/snapshots/ci/pyside/6.0.0/latest pyside6 --trusted-host download.qt.io
 
 Test your Installation
 ----------------------
@@ -52,11 +52,6 @@ constructs to print version information::
     # Prints the Qt version used to compile PySide6
     print(PySide6.QtCore.__version__)
 
-.. note::
-
-    As it happened in 5.14.2, PySide had a couple of new releases to fix
-    issues in 5.14.2, adding yet another version level. In that case, you
-    will have different versions being shown for Qt and PySide.
 
 Create a Simple Application
 ---------------------------

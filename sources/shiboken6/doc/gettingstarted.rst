@@ -11,9 +11,9 @@ need to continue if you already have a built PySide.
 General Requirements
 ^^^^^^^^^^^^^^^^^^^^
 
- * **Python**: 3.5+ and 2.7
- * **Qt:** 5.12+ (5.15 is recommended)
- * **libclang:** The libclang library, recommended: version 10 for Shiboken6 5.15.
+ * **Python**: 3.6+
+ * **Qt:** 6.0+
+ * **libclang:** The libclang library, recommended: version 10 for 6.0+.
    Prebuilt versions of it can be `downloaded here`_.
  * **CMake:** 3.1+ is needed.
 

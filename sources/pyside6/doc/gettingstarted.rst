@@ -15,8 +15,8 @@ General Requirements
 --------------------
 
  * **Python**: 3.6+
- * **Qt:** 5.12+ is recommended
- * **libclang:** The libclang library, recommended: version 10 for PySide6 5.15.
+ * **Qt:** 6.0+ is recommended
+ * **libclang:** The libclang library, recommended: version 10 for 6.0+.
    Prebuilt versions of it can be `downloaded here`_.
  * **CMake:** 3.1+ is needed.
 
@@ -33,7 +33,7 @@ You can refer to the following pages for platform specific instructions:
  * Mobile platforms (iOS/Android) **(no support)**
  * Embedded platforms **(no official support)**
 
-   .. note:: Most Linux-based embedded OS provide PySide6 with their official
+   .. note:: Most Linux-based embedded OS provide PySide with their official
              package manager (e.g. `Raspbian`_ and `ArchlinuxARM`_).
 
 .. _Windows: gettingstarted-windows.html
@@ -80,7 +80,7 @@ Using the ``--build-tests`` option will enable us to run all the auto tests insi
     python testrunner.py test > testlog.txt
 
 .. note:: On Windows, don't forget to have qmake in your path
-   (``set PATH=E:\Path\to\Qt\5.15\msvc2017_64\bin;%PATH%``)
+   (``set PATH=E:\Path\to\Qt\6.0.0\msvc2019_64\bin;%PATH%``)
 
 You can also run a specific test (for example ``qpainter_test``) by running::
 
@@ -184,9 +184,9 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 * ``create_changelog.py``: Script used to create the CHANGELOG that you can find in the ``dist/``
   directory. Usage::
 
-    python create_changelog.py -r 5.15.1 -v v5.15.0..5.15 -t bug-fix
+    python create_changelog.py -r 6.0.1 -v v6.0.0..6.0 -t bug-fix
 
-* ``debug_windows.py``: This script can be used to find out why PySide6 modules
+* ``debug_windows.py``: This script can be used to find out why PySide modules
   fail to load with various DLL errors like Missing DLL or Missing symbol in DLL.
 
   You can think of it as a Windows version of ``ldd`` / ``LD_DEBUG``.
@@ -194,7 +194,7 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
   Underneath it uses the ``cdb.exe`` command line debugger, and the ``gflags.exe`` tool, both
   installed with the latest Windows Kit.
 
-  The aim is to ask users to run this script when they encounter PySide6 imports not working on
+  The aim is to help developers debug issues that they may encounter using the PySide imports on
   Windows. The user should then provide the generated log file.
 
   Incidentally it can also be used for any Windows executables, not just Python.
@@ -202,15 +202,14 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 
     python debug_windows.py
 
-* ``missing_bindings.py``: This script is used to compare the state of PySide6 and PyQt5
+* ``missing_bindings.py``: This script is used to compare the state of PySide and PyQt
   regarding available modules and classses. This content is displayed in our `wiki page`_,
   and can be used as follows::
 
-    python missing_bindings.py --qt-version 5.15.1 -w all
+    python missing_bindings.py --qt-version 6.0.1 -w all
 
-  Please keep in mind we rely on BeautifulSoup_ to parse the content, so you will be to install
-  it besides PySide6 and PyQt5 (Including additional modules like DataVisualiztion, QtCharts,
-  WebEngine, etc).
+.. note:: The script relies on BeautifulSoup to parse the content and generate a list of the
+   missing bindings.
 
 
 .. _repository: https://github.com/liyanage/macosx-shell-scripts/

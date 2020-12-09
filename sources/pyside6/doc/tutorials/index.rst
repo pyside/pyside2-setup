@@ -27,11 +27,13 @@ Real use-cases applications
 .. toctree::
     :maxdepth: 1
 
-    datavisualize/index.rst
-    expenses/expenses.rst
     qmlapp/qmlapplication.rst
     qmlintegration/qmlintegration.rst
     qmlsqlintegration/qmlsqlintegration.rst
+..
+    datavisualize/index.rst
+..
+    expenses/expenses.rst
 
 C++ and Python
 --------------

@@ -7,16 +7,16 @@ Slot
 Detailed Description
 --------------------
 
-    PySide6 adopt PyQt5's new signal and slot syntax as-is. The PySide6
-    implementation is functionally compatible with the PyQt5 one, with the
+    PySide6 adopt PyQt's new signal and slot syntax as-is. The PySide6
+    implementation is functionally compatible with the PyQt one, with the
     exceptions listed below.
 
-    PyQt5's new signal and slot style utilizes method and decorator names
+    PyQt's new signal and slot style utilizes method and decorator names
     specific to their implementation. These will be generalized according to
     the table below:
 
     =======  =======================  =============
-    Module   PyQt5 factory function   PySide6 class
+    Module   PyQt factory function    PySide class
     =======  =======================  =============
     QtCore   pyqtSignal               Signal
     QtCore   pyqtSlot                 Slot

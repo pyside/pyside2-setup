@@ -6,7 +6,7 @@
 API Changes
 -----------
 
-One of the goals of |pymodname| is to be API compatible with PyQt5,
+One of the goals of |pymodname| is to be API compatible with PyQt,
 with certain exceptions.
 
 The latest considerations and known issues will be also reported

@@ -60,7 +60,7 @@ At the root level of your project, create a `pyproject.toml` file::
         description = "The coolest app ever"
         icon = "src/mypysideapp/resources/appicon" # Briecase will choose the right extension depending the os (png,ico,...)
         sources = ['src/mypysideapp']
-        requires = ['pyside6==5.15.0',
+        requires = ['pyside6==6.0.0',
                     'pony>=0.7.11,<0.8',
                     'dickens==1.0.1',
                     'Pillow==7.1.2',
