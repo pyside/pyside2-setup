@@ -185,6 +185,11 @@ static void addPySideExtensions(QByteArrayList *a)
     // annotating nothing, causing clang to complain. Instead, define it away in a
     // static assert with the stringified argument in a ','-operator (cf qdoc).
     a->append(QByteArrayLiteral("-DQT_ANNOTATE_CLASS(type,...)=static_assert(sizeof(#__VA_ARGS__),#type);"));
+
+    // With Qt6, qsimd.h became public header and was included in <QtCore>. That
+    // introduced a conflict with libclang headers on macOS. To be able to include
+    // <QtCore>, we prevent its inclusion by adding its include guard.
+    a->append(QByteArrayLiteral("-DQSIMD_H"));
 }
 
 bool ApiExtractor::run(bool usePySideExtensions)
