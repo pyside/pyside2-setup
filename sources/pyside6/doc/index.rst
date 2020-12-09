@@ -21,11 +21,15 @@
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.
 
+`Porting from PySide2 to PySide6`_ provides information on porting existing PySide2
+applications.
+
 This project is available under the LGPLv3/GPLv3 and the `Qt commercial license`_.
 
 .. _Qt: https://doc.qt.io
 .. _PySide6: quickstart.html
 .. _`Qt commercial license`: https://www.qt.io/licensing/
+.. _`Porting from PySide2 to PySide6`: porting_from2.html
 
 
 

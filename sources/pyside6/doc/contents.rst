@@ -6,6 +6,7 @@
 
     quickstart.rst
     gettingstarted.rst
+    porting_from2.rst
     api.rst
     tutorials/index.rst
     examples/index.rst
