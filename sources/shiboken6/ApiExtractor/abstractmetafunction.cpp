@@ -201,7 +201,7 @@ AbstractMetaFunction::~AbstractMetaFunction() = default;
  */
 bool AbstractMetaFunction::isModifiedRemoved(const AbstractMetaClass *cls) const
 {
-    if (d->m_functionType != GlobalScopeFunction && cls == nullptr)
+    if (!isInGlobalScope() && cls == nullptr)
         cls = d->m_implementingClass;
     for (const auto &mod : modifications(cls)) {
         if (mod.isRemoved())
@@ -554,6 +554,11 @@ bool AbstractMetaFunction::isConstructor() const
 bool AbstractMetaFunction::isNormal() const
 {
     return functionType() == NormalFunction || isSlot() || isInGlobalScope();
+}
+
+bool AbstractMetaFunction::isInGlobalScope() const
+{
+    return d->m_class == nullptr;
 }
 
 AbstractMetaFunction::FunctionType AbstractMetaFunction::functionType() const
@@ -1150,7 +1155,6 @@ TypeSystem::SnakeCase AbstractMetaFunction::snakeCase() const
     case AbstractMetaFunction::SignalFunction:
     case AbstractMetaFunction::EmptyFunction:
     case AbstractMetaFunction::SlotFunction:
-    case AbstractMetaFunction::GlobalScopeFunction:
         if (isOperatorOverload())
             return TypeSystem::SnakeCase::Disabled;
         break;

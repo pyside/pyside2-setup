@@ -64,7 +64,6 @@ public:
         SignalFunction,
         EmptyFunction,
         SlotFunction,
-        GlobalScopeFunction,
         GetAttroFunction,
         SetAttroFunction
     };
@@ -193,7 +192,7 @@ public:
     bool isDestructor() const { return functionType() == DestructorFunction; }
     bool isConstructor() const;
     bool isNormal() const;
-    bool isInGlobalScope() const { return functionType() == GlobalScopeFunction; }
+    bool isInGlobalScope() const;
     bool isSignal() const { return functionType() == SignalFunction; }
     bool isSlot() const { return functionType() == SlotFunction; }
     bool isEmptyFunction() const { return functionType() == EmptyFunction; }

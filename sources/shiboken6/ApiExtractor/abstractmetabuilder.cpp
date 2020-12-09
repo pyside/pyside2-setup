@@ -308,7 +308,6 @@ void AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
             AbstractMetaFunction *streamFunction = traverseFunction(item, streamedClass);
 
             if (streamFunction) {
-                streamFunction->setFunctionType(AbstractMetaFunction::GlobalScopeFunction);
                 // Strip first argument, since that is the containing object
                 AbstractMetaArgumentList arguments = streamFunction->arguments();
                 if (!streamClass->typeEntry()->generateCode())
