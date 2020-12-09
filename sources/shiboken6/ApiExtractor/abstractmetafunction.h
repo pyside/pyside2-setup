@@ -133,7 +133,6 @@ public:
 
     static bool isOperatorOverload(const QString& funcName);
     bool isOperatorOverload() const;
-    bool isCastOperator() const;
 
     bool isArithmeticOperator() const;
     bool isBitwiseOperator() const;

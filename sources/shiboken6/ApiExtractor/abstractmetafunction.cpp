@@ -873,9 +873,7 @@ bool AbstractMetaFunction::hasSignatureModifications() const
 
 bool AbstractMetaFunction::isConversionOperator(const QString &funcName)
 {
-    static const QRegularExpression opRegEx(QStringLiteral("^operator(?:\\s+(?:const|volatile))?\\s+(\\w+\\s*)&?$"));
-    Q_ASSERT(opRegEx.isValid());
-    return opRegEx.match(funcName).hasMatch();
+    return funcName.startsWith(QLatin1String("operator "));
 }
 
 ExceptionSpecification AbstractMetaFunction::exceptionSpecification() const
@@ -958,11 +956,6 @@ bool AbstractMetaFunction::isOperatorOverload(const QString &funcName)
 bool AbstractMetaFunction::isOperatorOverload() const
 {
     return isOperatorOverload(originalName());
-}
-
-bool AbstractMetaFunction::isCastOperator() const
-{
-    return originalName().startsWith(QLatin1String("operator "));
 }
 
 bool AbstractMetaFunction::isArithmeticOperator() const

@@ -80,7 +80,7 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
         || (func->attributes() & AbstractMetaAttributes::AddedMethod) != 0
         || func->isModifiedRemoved()
         || func->declaringClass() != func->ownerClass()
-        || func->isCastOperator()) {
+        || func->isConversionOperator()) {
         return true;
     }
     switch (func->functionType()) {

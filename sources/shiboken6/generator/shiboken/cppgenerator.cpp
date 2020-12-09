@@ -496,7 +496,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         for (const auto &func : it.value()) {
             if (!func->isAssignmentOperator()
                 && !func->usesRValueReferences()
-                && !func->isCastOperator()
+                && !func->isConversionOperator()
                 && !func->isModifiedRemoved()
                 && (!func->isPrivate() || func->functionType() == AbstractMetaFunction::EmptyFunction)
                 && func->ownerClass() == func->implementingClass()

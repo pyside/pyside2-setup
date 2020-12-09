@@ -2098,7 +2098,8 @@ bool ShibokenGenerator::classNeedsGetattroFunctionImpl(const AbstractMetaClass *
     for (auto it = functionGroup.cbegin(), end = functionGroup.cend(); it != end; ++it) {
         AbstractMetaFunctionCList overloads;
         for (const auto &func : qAsConst(it.value())) {
-            if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
+            if (func->isAssignmentOperator() || func->isConversionOperator()
+                || func->isModifiedRemoved()
                 || func->isPrivate() || func->ownerClass() != func->implementingClass()
                 || func->isConstructor() || func->isOperatorOverload())
                 continue;
@@ -2120,7 +2121,8 @@ AbstractMetaFunctionCList ShibokenGenerator::getMethodsWithBothStaticAndNonStati
         for (auto it = functionGroups.cbegin(), end = functionGroups.cend(); it != end; ++it) {
             AbstractMetaFunctionCList overloads;
             for (const auto &func : qAsConst(it.value())) {
-                if (func->isAssignmentOperator() || func->isCastOperator() || func->isModifiedRemoved()
+                if (func->isAssignmentOperator() || func->isConversionOperator()
+                    || func->isModifiedRemoved()
                     || func->isPrivate() || func->ownerClass() != func->implementingClass()
                     || func->isConstructor() || func->isOperatorOverload())
                     continue;
