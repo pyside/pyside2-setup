@@ -1,0 +1,17 @@
+Qt for Python 6.0.0 is a new major version release. It is not compatible with
+earlier Qt for Python releases.
+
+The goal has been to retain as much source compatibility with
+Qt for Python Qt 5.15 as possible, but some changes were inevitable.
+
+To make it easier to port to Qt for Python 6.0.0, we have created a porting
+guide to summarize those changes and provide guidance to handle them. In
+the guide, you can find links to articles about changes that may affect
+your application and help you transition from Qt for Python 5.15 to
+Qt for Python 6.0.0:
+
+https://doc.qt.io/qtforpython/qt-6/porting_from2.html
+
+For more details refer to the online documentation of Qt for Python 6.0.0:
+
+https://doc.qt.io/qtforpython/
