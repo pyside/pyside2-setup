@@ -2505,10 +2505,14 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
 
     QString cppOutAux = cppOut + QLatin1String("_local");
 
+    const bool isEnum = typeEntry->isEnum();
+    const bool isFlags = typeEntry->isFlags();
     bool treatAsPointer = isValueTypeWithCopyConstructorOnly(type);
     bool isPointerOrObjectType = (type.isObjectType() || type.isPointer())
-        && !type.isUserPrimitive() && !type.isExtendedCppPrimitive();
-    bool isNotContainerEnumOrFlags = !typeEntry->isContainer() && !typeEntry->isEnum() && !typeEntry->isFlags();
+        && !type.isUserPrimitive() && !type.isExtendedCppPrimitive()
+        && !isEnum && !isFlags;
+    const bool isNotContainerEnumOrFlags = !typeEntry->isContainer()
+                                           && !isEnum && !isFlags;
     bool mayHaveImplicitConversion = type.referenceType() == LValueReference
                                      && !type.isUserPrimitive()
                                      && !type.isExtendedCppPrimitive()
@@ -2528,7 +2532,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         s << typeName << ' ' << cppOutAux;
         writeMinimalConstructorExpression(s, type, defaultValue);
         s << ";\n";
-    } else if (avoidProtectedHack() && type.typeEntry()->isEnum()) {
+    } else if (avoidProtectedHack() && isEnum) {
         auto metaEnum = findAbstractMetaEnum(type);
         if (metaEnum.has_value() && metaEnum->isProtected()) {
             typeName = QLatin1String("long");
@@ -2562,7 +2566,7 @@ void CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                 s << "0";
             else
                 s << "(long)" << defaultValue;
-        } else if (type.isUserPrimitive() || typeEntry->isEnum() || typeEntry->isFlags()) {
+        } else if (type.isUserPrimitive() || isEnum || isFlags) {
             writeMinimalConstructorExpression(s, typeEntry, defaultValue);
         } else if (!type.isContainer() && !type.isSmartPointer()) {
             writeMinimalConstructorExpression(s, type, defaultValue);
