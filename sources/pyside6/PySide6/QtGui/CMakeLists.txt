@@ -76,7 +76,6 @@ ${QtGui_GEN_DIR}/qinputmethodevent_attribute_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qinputmethodqueryevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qintvalidator_wrapper.cpp
-${QtGui_GEN_DIR}/qkeycombination_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeyevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qkeysequence_wrapper.cpp
 ${QtGui_GEN_DIR}/qlineargradient_wrapper.cpp

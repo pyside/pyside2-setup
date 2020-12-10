@@ -352,6 +352,8 @@
     </conversion-rule>
   </primitive-type>
 
+  <value-type name="QKeyCombination"/>
+
   <value-type name="QMetaType">
       <enum-type name="Type"/>
       <enum-type name="TypeFlag" flags="TypeFlags"/>

@@ -76,6 +76,7 @@ ${QtCore_GEN_DIR}/qjsonarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsondocument_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonparseerror_wrapper.cpp
 ${QtCore_GEN_DIR}/qjsonvalue_wrapper.cpp
+${QtCore_GEN_DIR}/qkeycombination_wrapper.cpp
 ${QtCore_GEN_DIR}/qlibraryinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp

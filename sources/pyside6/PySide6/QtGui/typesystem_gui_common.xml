@@ -343,7 +343,6 @@
   <object-type name="QInputMethod">
       <enum-type name="Action"/>
   </object-type>
-  <value-type name="QKeyCombination"/>
   <value-type name="QKeySequence">
     <enum-type name="SequenceFormat"/>
     <enum-type name="SequenceMatch"/>
