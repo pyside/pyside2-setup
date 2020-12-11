@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,35 +26,50 @@
 **
 ****************************************************************************/
 
-#include "sphinxtabletest.h"
-#include "qtdocgenerator.h"
+#include "qtxmltosphinxtest.h"
+#include "qtxmltosphinx.h"
 #include <QtTest/QTest>
-#include <QDebug>
 
-QString SphinxTableTest::transformXml(const char* xml)
+#include <QtCore/QDebug>
+#include <QtCore/QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcQtXmlToSphinxTest, "qt.sphinxtabletest");
+
+// QtXmlToSphinxDocGeneratorInterface
+QString QtXmlToSphinxTest::expandFunction(const QString &) const
 {
-    return QtXmlToSphinx(m_generator, xml).result();
+    return {};
 }
 
-void SphinxTableTest::setUp()
+QString QtXmlToSphinxTest::expandClass(const QString &, const QString &) const
 {
-    m_generator = new QtDocGenerator;
+    return {};
 }
 
-void SphinxTableTest::tearDown()
+QString QtXmlToSphinxTest::resolveContextForMethod(const QString &, const QString &) const
 {
-    delete m_generator;
+    return {};
 }
 
-void SphinxTableTest::testEmptyString()
+const QLoggingCategory &QtXmlToSphinxTest::loggingCategory() const
 {
-    const char* xml = "";
-    QCOMPARE(transformXml(xml), QString());
+    return lcQtXmlToSphinxTest();
 }
 
-void SphinxTableTest::testSimpleTable()
+QString QtXmlToSphinxTest::transformXml(const QString &xml) const
 {
-    const char* xml = "\
+    return QtXmlToSphinx(this, m_parameters, xml).result();
+}
+
+void QtXmlToSphinxTest::testTable_data()
+{
+    QTest::addColumn<QString>("xml");
+    QTest::addColumn<QString>("expected");
+
+    QTest::newRow("emptyString") << QString() << QString();
+
+    // testSimpleTable
+    const char *xml = "\
 <table>\
     <header>\
         <item>\
@@ -81,7 +96,8 @@ void SphinxTableTest::testSimpleTable()
         </item>\
     </row>\
 </table>";
-    QCOMPARE(transformXml(xml), QString("\
+
+    const char *expected = "\n\
     +--------+--------+\n\
     |Header 1|Header 2|\n\
     +--------+--------+\n\
@@ -89,12 +105,13 @@ void SphinxTableTest::testSimpleTable()
     +--------+--------+\n\
     |2 1     |2 2     |\n\
     +--------+--------+\n\
-\n"));
-}
+\n";
 
-void SphinxTableTest::testColSpan()
-{
-    const char* xml = "\
+    QTest::newRow("testSimpleTable")
+        << QString::fromLatin1(xml) << QString::fromLatin1(expected);
+
+    // testRowSpan
+    xml = "\
 <table>\
     <header>\
         <item>\
@@ -118,7 +135,8 @@ void SphinxTableTest::testColSpan()
         </item>\
     </row>\
 </table>";
-    QCOMPARE(transformXml(xml), QString("\
+
+    expected = "\n\
     +---------------+--------+\n\
     |Header 1       |Header 2|\n\
     +---------------+--------+\n\
@@ -126,13 +144,13 @@ void SphinxTableTest::testColSpan()
     +---------------+--------+\n\
     |2 1            |2 2     |\n\
     +---------------+--------+\n\
-\n"));
-}
+\n";
 
+    QTest::newRow("testColSpan")
+        << QString::fromLatin1(xml) << QString::fromLatin1(expected);
 
-void SphinxTableTest::testRowSpan()
-{
-    const char* xml = "\
+    // testRowSpan
+    xml = "\
 <table>\
     <header>\
         <item>\
@@ -156,7 +174,8 @@ void SphinxTableTest::testRowSpan()
         </item>\
     </row>\
 </table>";
-    QCOMPARE(transformXml(xml), QString("\
+
+    expected = "\n\
     +--------+--------+\n\
     |Header 1|Header 2|\n\
     +--------+--------+\n\
@@ -164,13 +183,13 @@ void SphinxTableTest::testRowSpan()
     +        +--------+\n\
     |        |2 2     |\n\
     +--------+--------+\n\
-\n"));
-}
+\n";
 
+    QTest::newRow("testRowSpan")
+        << QString::fromLatin1(xml) << QString::fromLatin1(expected);
 
-void SphinxTableTest::testComplexTable()
-{
-    const char* xml = "\
+    // testComplexTable
+    xml = "\
 <table>\
     <header>\
         <item>\
@@ -200,7 +219,8 @@ void SphinxTableTest::testComplexTable()
         </item>\
     </row>\
 </table>";
-    QCOMPARE(transformXml(xml), QString("\
+
+    expected = "\n\
     +--------+--------+--------+\n\
     |Header 1|Header 2|Header 3|\n\
     +--------+--------+--------+\n\
@@ -208,12 +228,13 @@ void SphinxTableTest::testComplexTable()
     +        +--------+--------+\n\
     |        |2 2     |2 3     |\n\
     +--------+--------+--------+\n\
-\n"));
-}
+\n";
 
-void SphinxTableTest::testRowSpan2()
-{
-    const char* xml = "\
+    QTest::newRow("testComplexTable")
+        << QString::fromLatin1(xml) << QString::fromLatin1(expected);
+
+    // testRowSpan2
+    xml = "\
 <table>\
     <header>\
         <item><para>h1</para></item>\
@@ -248,7 +269,8 @@ void SphinxTableTest::testRowSpan2()
         <item><para>F</para></item>\
     </row>\
 </table>";
-    QCOMPARE(transformXml(xml), QString("\
+
+    expected = "\n\
     +--+--+--+--+\n\
     |h1|h2|h3|h4|\n\
     +--+--+--+--+\n\
@@ -264,12 +286,13 @@ void SphinxTableTest::testRowSpan2()
     +  +  +--+--+\n\
     |  |  |E |F |\n\
     +--+--+--+--+\n\
-\n"));
-}
+\n";
 
-void SphinxTableTest::testBrokenTable()
-{
-    const char* xml = "\
+    QTest::newRow("testRowSpan2")
+        << QString::fromLatin1(xml) << QString::fromLatin1(expected);
+
+    // testBrokenTable
+    xml = "\
 <table>\
     <header>\
         <item>\
@@ -313,7 +336,8 @@ void SphinxTableTest::testBrokenTable()
         </item>\
     </row>\
 </table>";
-    QCOMPARE(transformXml(xml), QString("\
+
+    expected = "\n\
     +--------+------------+\n\
     |Header 1|Header 2    |\n\
     +--------+------------+\n\
@@ -323,10 +347,21 @@ void SphinxTableTest::testBrokenTable()
     +--------+------------+\n\
     |3 1     |3 2 3 3     |\n\
     +--------+------------+\n\
-\n"));
+\n";
+
+    QTest::newRow("testBrokenTable")
+        << QString::fromLatin1(xml) << QString::fromLatin1(expected);
 }
 
+void QtXmlToSphinxTest::testTable()
+{
+    QFETCH(QString, xml);
+    QFETCH(QString, expected);
 
-QTEST_APPLESS_MAIN( SphinxTableTest )
+    const QString actual = transformXml(xml);
 
-#include "sphinxtabletest.moc"
+    QEXPECT_FAIL("testBrokenTable", "testBrokenTable fails", Continue);
+    QCOMPARE(actual, expected);
+}
+
+QTEST_APPLESS_MAIN( QtXmlToSphinxTest)

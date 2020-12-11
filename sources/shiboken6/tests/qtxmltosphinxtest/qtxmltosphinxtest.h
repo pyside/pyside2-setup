@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -26,29 +26,32 @@
 **
 ****************************************************************************/
 
-#ifndef SPHINXTABLETEST_H
-#define SPHINXTABLETEST_H
+#ifndef QTXMLTOSPHINXTEST_H
+#define QTXMLTOSPHINXTEST_H
 
-#include <QObject>
+#include "qtxmltosphinxinterface.h"
 
-class QtDocGenerator;
-class SphinxTableTest : public QObject {
+#include <QtCore/QObject>
+
+class QtXmlToSphinxTest : public QObject, public QtXmlToSphinxDocGeneratorInterface
+{
     Q_OBJECT
+public:
+    // QtXmlToSphinxDocGeneratorInterface
+    QString expandFunction(const QString &) const override;
+    QString expandClass(const QString &, const QString &) const;
+    QString resolveContextForMethod(const QString &,
+                                    const QString &) const override;
+    const QLoggingCategory &loggingCategory() const override;
 
 private slots:
-    void setUp();
-    void tearDown();
-    void testEmptyString();
-    void testSimpleTable();
-    void testRowSpan();
-    void testColSpan();
-    void testComplexTable();
-    void testRowSpan2();
-    void testBrokenTable();
-private:
-    QtDocGenerator* m_generator;
+    void testTable_data();
+    void testTable();
 
-    QString transformXml(const char* xml);
+private:
+    QString transformXml(const QString &xml) const;
+
+    QtXmlToSphinxParameters m_parameters;
 };
 
-#endif
+#endif // QTXMLTOSPHINXTEST_H
