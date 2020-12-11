@@ -30,6 +30,7 @@
 
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
+#include <QtCore/QScopedPointer>
 
 #include "generator.h"
 #include "documentation.h"
@@ -113,7 +114,7 @@ private:
     QString m_extraSectionDir;
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;
-    DocParser* m_docParser;
+    QScopedPointer<DocParser> m_docParser;
     QString m_additionalDocumentationList;
 };
 

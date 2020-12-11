@@ -148,14 +148,11 @@ static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc)
     return result;
 }
 
-QtDocGenerator::QtDocGenerator() : m_docParser(nullptr)
+QtDocGenerator::QtDocGenerator()
 {
 }
 
-QtDocGenerator::~QtDocGenerator()
-{
-    delete m_docParser;
-}
+QtDocGenerator::~QtDocGenerator() = default;
 
 QString QtDocGenerator::fileNameSuffix() const
 {
@@ -1003,8 +1000,8 @@ bool QtDocGenerator::doSetup()
     if (m_codeSnippetDirs.isEmpty())
         m_codeSnippetDirs = m_libSourceDir.split(QLatin1Char(PATH_SEP));
 
-    if (!m_docParser)
-        m_docParser = new QtDocParser;
+    if (m_docParser.isNull())
+        m_docParser.reset(new QtDocParser);
 
     if (m_libSourceDir.isEmpty() || m_docDataDir.isEmpty()) {
         qCWarning(lcShibokenDoc) << "Documentation data dir and/or Qt source dir not informed, "
@@ -1058,7 +1055,7 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
     if (key == QLatin1String("doc-parser")) {
         qCDebug(lcShibokenDoc).noquote().nospace() << "doc-parser: " << value;
         if (value == QLatin1String("doxygen"))
-            m_docParser = new DoxygenParser;
+            m_docParser.reset(new DoxygenParser);
         return true;
     }
     if (key == additionalDocumentationOption()) {
