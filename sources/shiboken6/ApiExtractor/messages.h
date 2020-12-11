@@ -231,11 +231,4 @@ QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
 QString msgRegisterMetaTypeUnqualifiedName(const AbstractMetaClass *c,
                                            const char *file, int line);
 
-QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
-                      const QString &tag, const QString &message);
-
-QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &context,
-                           const QString &tag, const QString &location,
-                           const QString &identifier, const QString &fallback);
-
 #endif // MESSAGES_H

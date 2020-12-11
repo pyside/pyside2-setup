@@ -36,24 +36,18 @@
 #include "documentation.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
+#include "qtxmltosphinxinterface.h"
 
 class DocParser;
 
 /**
 *   The DocGenerator generates documentation from library being binded.
 */
-class QtDocGenerator : public Generator
+class QtDocGenerator : public Generator, public QtXmlToSphinxDocGeneratorInterface
 {
 public:
     QtDocGenerator();
     ~QtDocGenerator();
-
-    QString libSourceDir() const
-    {
-        return m_libSourceDir;
-    }
-
-    QString docDataDir() const { return m_docDataDir; }
 
     bool doSetup() override;
 
@@ -65,10 +59,13 @@ public:
     OptionDescriptions options() const override;
     bool handleOption(const QString &key, const QString &value) override;
 
-    QStringList codeSnippetDirs() const
-    {
-        return m_codeSnippetDirs;
-    }
+    // QtXmlToSphinxDocGeneratorInterface
+    QString expandFunction(const QString &function) const override;
+    QString expandClass(const QString &context,
+                        const QString &name) const override;
+    QString resolveContextForMethod(const QString &context,
+                                    const QString &methodName) const override;
+    const QLoggingCategory &loggingCategory() const override;
 
 protected:
     bool shouldGenerate(const AbstractMetaClass *) const override;
@@ -108,13 +105,16 @@ private:
                                     const AbstractMetaFunctionCPtr &func);
     QString translateToPythonType(const AbstractMetaType &type, const AbstractMetaClass *cppClass) const;
 
-    QString m_docDataDir;
-    QString m_libSourceDir;
-    QStringList m_codeSnippetDirs;
+    bool convertToRst(const QString &sourceFileName,
+                      const QString &targetFileName,
+                      const QString &context = QString(),
+                      QString *errorMessage = nullptr) const;
+
     QString m_extraSectionDir;
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;
     QScopedPointer<DocParser> m_docParser;
+    QtXmlToSphinxParameters m_parameters;
     QString m_additionalDocumentationList;
 };
 

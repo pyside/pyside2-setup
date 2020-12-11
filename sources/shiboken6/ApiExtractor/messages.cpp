@@ -792,33 +792,3 @@ QString msgRegisterMetaTypeUnqualifiedName(const AbstractMetaClass *c,
         << "). This is currently fixed by a hack(ct) and needs improvement!";
     return result;
 }
-
-// qtdocgenerator.cpp
-
-QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
-                      const QString &tag, const QString &message)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "While handling <";
-    const auto currentTag = reader.name();
-    if (currentTag.isEmpty())
-        str << tag;
-    else
-        str << currentTag;
-    str << "> in " << context << ", line "<< reader.lineNumber()
-        << ": " << message;
-    return result;
-}
-
-QString msgFallbackWarning(const QXmlStreamReader &reader, const QString &context,
-                           const QString &tag, const QString &location,
-                           const QString &identifier, const QString &fallback)
-{
-    QString message = QLatin1String("Falling back to \"")
-        + QDir::toNativeSeparators(fallback) + QLatin1String("\" for \"")
-        + location + QLatin1Char('"');
-    if (!identifier.isEmpty())
-        message += QLatin1String(" [") + identifier + QLatin1Char(']');
-    return msgTagWarning(reader, context, tag, message);
-}

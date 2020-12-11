@@ -40,7 +40,9 @@
 QT_BEGIN_NAMESPACE
 class QXmlStreamReader;
 QT_END_NAMESPACE
-class QtDocGenerator;
+
+class QtXmlToSphinxDocGeneratorInterface;
+struct QtXmlToSphinxParameters;
 
 enum class WebXmlTag;
 
@@ -112,16 +114,11 @@ public:
             bool m_normalized = false;
     };
 
-    explicit QtXmlToSphinx(const QtDocGenerator *generator,
+    explicit QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
+                           const QtXmlToSphinxParameters &parameters,
                            const QString& doc,
                            const QString& context = QString());
     ~QtXmlToSphinx();
-
-    static bool convertToRst(const QtDocGenerator *generator,
-                             const QString &sourceFileName,
-                             const QString &targetFileName,
-                             const QString &context = QString(),
-                             QString *errorMessage = nullptr);
 
     QString result() const
     {
@@ -131,8 +128,6 @@ public:
     static void stripPythonQualifiers(QString *s);
 
 private:
-    QString resolveContextForMethod(const QString& methodName) const;
-    QString expandFunction(const QString& function) const;
     QString transform(const QString& doc);
 
     void handleHeadingTag(QXmlStreamReader& reader);
@@ -171,6 +166,9 @@ private:
     void handleLinkText(LinkContext *linkContext, const QString &linktext) const;
     void handleLinkEnd(LinkContext *linkContext);
 
+    void warn(const QString &message) const;
+    void debug(const QString &message) const;
+
     QStack<WebXmlTag> m_tagStack;
     TextStream m_output;
     QString m_result;
@@ -182,7 +180,8 @@ private:
     QScopedPointer<LinkContext> m_seeAlsoContext; // for <see-also>foo()</see-also>
     bool m_tableHasHeader;
     QString m_context;
-    const QtDocGenerator* m_generator;
+    const QtXmlToSphinxDocGeneratorInterface *m_generator;
+    const QtXmlToSphinxParameters &m_parameters;
     bool m_insideBold;
     bool m_insideItalic;
     QString m_lastTagName;
@@ -198,6 +197,7 @@ private:
     void writeTable(Table& table);
     bool copyImage(const QString &href) const;
     void callHandler(WebXmlTag t, QXmlStreamReader &);
+    void formatCurrentTable();
 };
 
 inline TextStream& operator<<(TextStream& s, const QtXmlToSphinx& xmlToSphinx)

@@ -40,6 +40,7 @@
 #include <propertyspec.h>
 #include <reporthandler.h>
 #include <textstream.h>
+#include <typedatabase.h>
 #include <typesystem.h>
 #include <qtdocparser.h>
 #include <doxygenparser.h>
@@ -150,6 +151,8 @@ static QString getFuncName(const AbstractMetaFunctionCPtr& cppFunc)
 
 QtDocGenerator::QtDocGenerator()
 {
+    m_parameters.snippetComparison =
+        ReportHandler::debugLevel() >= ReportHandler::FullDebug;
 }
 
 QtDocGenerator::~QtDocGenerator() = default;
@@ -186,7 +189,7 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const Documentation &doc,
         metaClassName = metaClass->fullName();
 
     if (doc.format() == Documentation::Native) {
-        QtXmlToSphinx x(this, doc.value(docType), metaClassName);
+        QtXmlToSphinx x(this, m_parameters, doc.value(docType), metaClassName);
         s << x;
     } else {
         const QString &value = doc.value(docType);
@@ -905,7 +908,7 @@ void QtDocGenerator::writeModuleDocumentation()
             if (moduleDoc.format() == Documentation::Native) {
                 QString context = it.key();
                 QtXmlToSphinx::stripPythonQualifiers(&context);
-                QtXmlToSphinx x(this, moduleDoc.value(), context);
+                QtXmlToSphinx x(this, m_parameters, moduleDoc.value(), context);
                 s << x;
             } else {
                 s << moduleDoc.value();
@@ -962,13 +965,13 @@ void QtDocGenerator::writeAdditionalDocumentation() const
             }
         } else {
             // Normal file entry
-            QFileInfo fi(m_docDataDir + QLatin1Char('/') + line);
+            QFileInfo fi(m_parameters.docDataDir + QLatin1Char('/') + line);
             if (fi.isFile()) {
                 const QString rstFileName = fi.baseName() + rstSuffix;
                 const QString rstFile = targetDir + QLatin1Char('/') + rstFileName;
                 const QString context = targetDir.mid(targetDir.lastIndexOf(QLatin1Char('/')) + 1);
-                if (QtXmlToSphinx::convertToRst(this, fi.absoluteFilePath(),
-                                                rstFile, context, &errorMessage)) {
+                if (convertToRst(fi.absoluteFilePath(),
+                                 rstFile, context, &errorMessage)) {
                     ++successCount;
                     qCDebug(lcShibokenDoc).nospace().noquote() << __FUNCTION__
                         << " converted " << fi.fileName()
@@ -978,7 +981,7 @@ void QtDocGenerator::writeAdditionalDocumentation() const
                 }
             } else {
                 qCWarning(lcShibokenDoc, "%s",
-                          qPrintable(msgNonExistentAdditionalDocFile(m_docDataDir, line)));
+                          qPrintable(msgNonExistentAdditionalDocFile(m_parameters.docDataDir, line)));
             }
             ++count;
         }
@@ -997,20 +1000,23 @@ void QtDocGenerator::writeAdditionalDocumentation() const
 
 bool QtDocGenerator::doSetup()
 {
-    if (m_codeSnippetDirs.isEmpty())
-        m_codeSnippetDirs = m_libSourceDir.split(QLatin1Char(PATH_SEP));
+    if (m_parameters.codeSnippetDirs.isEmpty()) {
+        m_parameters.codeSnippetDirs =
+            m_parameters.libSourceDir.split(QLatin1Char(PATH_SEP));
+    }
 
     if (m_docParser.isNull())
         m_docParser.reset(new QtDocParser);
 
-    if (m_libSourceDir.isEmpty() || m_docDataDir.isEmpty()) {
+    if (m_parameters.libSourceDir.isEmpty()
+        || m_parameters.docDataDir.isEmpty()) {
         qCWarning(lcShibokenDoc) << "Documentation data dir and/or Qt source dir not informed, "
                                  "documentation will not be extracted from Qt sources.";
         return false;
     }
 
-    m_docParser->setDocumentationDataDirectory(m_docDataDir);
-    m_docParser->setLibrarySourceDirectory(m_libSourceDir);
+    m_docParser->setDocumentationDataDirectory(m_parameters.docDataDir);
+    m_docParser->setLibrarySourceDirectory(m_parameters.libSourceDir);
     return true;
 }
 
@@ -1037,15 +1043,15 @@ Generator::OptionDescriptions QtDocGenerator::options() const
 bool QtDocGenerator::handleOption(const QString &key, const QString &value)
 {
     if (key == QLatin1String("library-source-dir")) {
-        m_libSourceDir = value;
+        m_parameters.libSourceDir = value;
         return true;
     }
     if (key == QLatin1String("documentation-data-dir")) {
-        m_docDataDir = value;
+        m_parameters.docDataDir = value;
         return true;
     }
     if (key == QLatin1String("documentation-code-snippets-dir")) {
-        m_codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
+        m_parameters.codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
         return true;
     }
     if (key == QLatin1String("documentation-extra-sections-dir")) {
@@ -1063,4 +1069,102 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
         return true;
     }
     return false;
+}
+
+bool QtDocGenerator::convertToRst(const QString &sourceFileName,
+                                  const QString &targetFileName,
+                                  const QString &context,
+                                  QString *errorMessage) const
+{
+    QFile sourceFile(sourceFileName);
+    if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (errorMessage)
+            *errorMessage = msgCannotOpenForReading(sourceFile);
+        return false;
+    }
+    const QString doc = QString::fromUtf8(sourceFile.readAll());
+    sourceFile.close();
+
+    FileOut targetFile(targetFileName);
+    QtXmlToSphinx x(this, m_parameters, doc, context);
+    targetFile.stream << x;
+    return targetFile.done(errorMessage) != FileOut::Failure;
+}
+
+// QtXmlToSphinxDocGeneratorInterface
+QString QtDocGenerator::expandFunction(const QString &function) const
+{
+    const int firstDot = function.indexOf(QLatin1Char('.'));
+    const AbstractMetaClass *metaClass = nullptr;
+    if (firstDot != -1) {
+        const auto className = QStringView{function}.left(firstDot);
+        for (const AbstractMetaClass *cls : classes()) {
+            if (cls->name() == className) {
+                metaClass = cls;
+                break;
+            }
+        }
+    }
+
+    return metaClass
+        ? metaClass->typeEntry()->qualifiedTargetLangName()
+          + function.right(function.size() - firstDot)
+        : function;
+}
+
+QString QtDocGenerator::expandClass(const QString &context,
+                                    const QString &name) const
+{
+    if (auto typeEntry = TypeDatabase::instance()->findType(name))
+        return typeEntry->qualifiedTargetLangName();
+    // fall back to the old heuristic if the type wasn't found.
+    QString result = name;
+    const auto rawlinklist = QStringView{name}.split(QLatin1Char('.'));
+    QStringList splittedContext = context.split(QLatin1Char('.'));
+    if (rawlinklist.size() == 1 || rawlinklist.constFirst() == splittedContext.constLast()) {
+        splittedContext.removeLast();
+        result.prepend(QLatin1Char('~') + splittedContext.join(QLatin1Char('.'))
+                       + QLatin1Char('.'));
+    }
+    return result;
+}
+
+QString QtDocGenerator::resolveContextForMethod(const QString &context,
+                                                const QString &methodName) const
+{
+    const auto currentClass = QStringView{context}.split(QLatin1Char('.')).constLast();
+
+    const AbstractMetaClass *metaClass = nullptr;
+    for (const AbstractMetaClass *cls : classes()) {
+        if (cls->name() == currentClass) {
+            metaClass = cls;
+            break;
+        }
+    }
+
+    if (metaClass) {
+        AbstractMetaFunctionCList funcList;
+        const auto &methods = metaClass->queryFunctionsByName(methodName);
+        for (const auto &func : methods) {
+            if (methodName == func->name())
+                funcList.append(func);
+        }
+
+        const AbstractMetaClass *implementingClass = nullptr;
+        for (const auto &func : qAsConst(funcList)) {
+            implementingClass = func->implementingClass();
+            if (implementingClass->name() == currentClass)
+                break;
+        }
+
+        if (implementingClass)
+            return implementingClass->typeEntry()->qualifiedTargetLangName();
+    }
+
+    return QLatin1Char('~') + context;
+}
+
+const QLoggingCategory &QtDocGenerator::loggingCategory() const
+{
+    return lcShibokenDoc();
 }
