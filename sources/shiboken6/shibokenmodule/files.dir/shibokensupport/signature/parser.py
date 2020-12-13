@@ -114,8 +114,8 @@ def _parse_line(line):
             if idx == 0 and tokens[0] == "self":
                 tokens = 2 * tokens     # "self: self"
             else:
-                warnings.warn('Invalid argument "{}" in "{}".'.format(arg, line))
-                continue
+                # This should never happen again (but who knows?)
+                raise SystemError(f'Invalid argument "{arg}" in "{line}".')
         name, ann = tokens
         if name in keyword.kwlist:
             if LIST_KEYWORDS:

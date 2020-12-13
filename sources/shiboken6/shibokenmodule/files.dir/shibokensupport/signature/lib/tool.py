@@ -91,25 +91,27 @@ def build_brace_pattern(level, separators=""):
     avoiding this problem completely. It might be considered to switch to
     such an engine if the external module is not a problem.
     """
-    def escape(str):
-        return "".join("\\" + c for c in str)
+    def escape(txt):
+        return "".join("\\" + c for c in txt)
 
-    ro, rc = round  = "()"
+    ro, rc = round_ = "()"
     so, sc = square = "[]"
     co, cc = curly  = "CD"      # we insert "{}", later...
     ao, ac = angle  = "<>"
-    qu, bs = '"', "\\"
-    all = round + square + curly + angle
+    q2, bs, q1 = '"', "\\", "'"
+    allpat = round_ + square + curly + angle
     __ = "  "
-    ro, rc, so, sc, co, cc, ao, ac, separators, qu, bs, all = map(
-        escape, (ro, rc, so, sc, co, cc, ao, ac, separators, qu, bs, all))
+    ro, rc, so, sc, co, cc, ao, ac, separators, q2, bs, q1, allpat = map(
+        escape, (ro, rc, so, sc, co, cc, ao, ac, separators, q2, bs, q1, allpat))
 
-    no_brace_sep_q = fr"[^{all}{separators}{qu}{bs}]"
-    no_quote = fr"(?: [^{qu}{bs}] | {bs}. )*"
+    no_brace_sep_q = fr"[^{allpat}{separators}{q2}{bs}{q1}]"
+    no_quot2 = fr"(?: [^{q2}{bs}] | {bs}. )*"
+    no_quot1 = fr"(?: [^{q1}{bs}] | {bs}. )*"
     pattern = dedent(r"""
         (
           (?: {__} {no_brace_sep_q}
-            | {qu} {no_quote} {qu}
+            | {q2} {no_quot2} {q2}
+            | {q1} {no_quot1} {q1}
             | {ro} {replacer} {rc}
             | {so} {replacer} {sc}
             | {co} {replacer} {cc}
@@ -117,10 +119,11 @@ def build_brace_pattern(level, separators=""):
           )+
         )
         """)
-    no_braces_q = f"[^{all}{qu}{bs}]*"
+    no_braces_q = f"[^{allpat}{q2}{bs}{q1}]*"
     repeated = dedent(r"""
         {indent}  (?: {__} {no_braces_q}
-        {indent}    | {qu} {no_quote} {qu}
+        {indent}    | {q2} {no_quot2} {q2}
+        {indent}    | {q1} {no_quot1} {q1}
         {indent}    | {ro} {replacer} {rc}
         {indent}    | {so} {replacer} {sc}
         {indent}    | {co} {replacer} {cc}
