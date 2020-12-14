@@ -2998,55 +2998,29 @@ void AbstractMetaBuilderPrivate::dumpLog() const
     writeRejectLogFile(m_logDirectory + QLatin1String("mjb_rejected_fields.log"), m_rejectedFields);
 }
 
-using ClassIndexHash = QHash<const AbstractMetaClass *, int>;
-
-static ClassIndexHash::ConstIterator findByTypeEntry(const ClassIndexHash &map,
-                                                     const TypeEntry *typeEntry)
-{
-    auto it = map.cbegin();
-    for (auto end = map.cend(); it != end; ++it) {
-        if (it.key()->typeEntry() == typeEntry)
-            break;
-    }
-    return it;
-}
+using ClassGraph = Graph<AbstractMetaClass *>;
 
 // Add a dependency of the class associated with typeEntry on clazz
-static void addClassDependency(const TypeEntry *typeEntry,
-                               const AbstractMetaClass *clazz,
-                               int classIndex, const  ClassIndexHash &map,
-                               Graph *graph)
+static bool addClassDependency(const AbstractMetaClassList &classList,
+                               const TypeEntry *typeEntry,
+                               AbstractMetaClass *clazz,
+                               ClassGraph *graph)
 {
-    if (typeEntry->isComplex() && typeEntry != clazz->typeEntry()) {
-        const auto it = findByTypeEntry(map, typeEntry);
-        if (it != map.cend() && it.key()->enclosingClass() != clazz)
-            graph->addEdge(it.value(), classIndex);
-    }
+    if (!typeEntry->isComplex() || typeEntry == clazz->typeEntry())
+        return false;
+    const auto c = AbstractMetaClass::findClass(classList, typeEntry);
+    if (c == nullptr || c->enclosingClass() == clazz)
+        return false;
+    return graph->addEdge(c, clazz);
 }
 
 AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClassList &classList,
                                                                            const Dependencies &additionalDependencies) const
 {
-    ClassIndexHash map;
-    QHash<int, AbstractMetaClass *> reverseMap;
-
-    int i = 0;
-    for (AbstractMetaClass *clazz : classList) {
-        if (map.contains(clazz))
-            continue;
-        map.insert(clazz, i);
-        reverseMap.insert(i, clazz);
-        i++;
-    }
-
-    Graph graph(map.count());
+    ClassGraph graph(classList.cbegin(), classList.cend());
 
     for (const auto &dep : additionalDependencies) {
-        const int parentIndex = map.value(dep.parent, -1);
-        const int childIndex = map.value(dep.child, -1);
-        if (parentIndex >= 0 && childIndex >= 0) {
-            graph.addEdge(parentIndex, childIndex);
-        } else {
+        if (!graph.addEdge(dep.parent, dep.child)) {
             qCWarning(lcShiboken).noquote().nospace()
                 << "AbstractMetaBuilder::classesTopologicalSorted(): Invalid additional dependency: "
                 << dep.child->name() << " -> " << dep.parent->name() << '.';
@@ -3054,19 +3028,14 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
     }
 
     for (AbstractMetaClass *clazz : classList) {
-        const int classIndex = map.value(clazz);
-        if (auto enclosing = clazz->enclosingClass()) {
-            const auto enclosingIt = map.constFind(const_cast< AbstractMetaClass *>(enclosing));
-            if (enclosingIt!= map.cend())
-                graph.addEdge(enclosingIt.value(), classIndex);
+        if (auto enclosingC = clazz->enclosingClass()) {
+            auto enclosing = const_cast<AbstractMetaClass *>(enclosingC);
+            graph.addEdge(enclosing, clazz);
         }
 
         const AbstractMetaClassList &bases = getBaseClasses(clazz);
-        for (AbstractMetaClass *baseClass : bases) {
-            const auto baseIt = map.constFind(baseClass);
-            if (baseIt!= map.cend())
-                graph.addEdge(baseIt.value(), classIndex);
-        }
+        for (AbstractMetaClass *baseClass : bases)
+            graph.addEdge(baseClass, clazz);
 
         for (const auto &func : clazz->functions()) {
             const AbstractMetaArgumentList &arguments = func->arguments();
@@ -3075,44 +3044,36 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
                 // ("QString s = QString()"), add a dependency.
                 if (!arg.originalDefaultValueExpression().isEmpty()
                     && arg.type().isValue()) {
-                    addClassDependency(arg.type().typeEntry(), clazz, classIndex,
-                                       map, &graph);
+                    addClassDependency(classList, arg.type().typeEntry(),
+                                       clazz, &graph);
                 }
             }
         }
         // Member fields need to be initialized
         for (const AbstractMetaField &field : clazz->fields()) {
-            addClassDependency(field.type().typeEntry(), clazz, classIndex,
-                               map, &graph);
+            addClassDependency(classList, field.type().typeEntry(),
+                               clazz, &graph);
         }
     }
 
-    AbstractMetaClassList result;
-    const auto unmappedResult = graph.topologicalSort();
-    if (!unmappedResult.isValid() && graph.nodeCount()) {
+    const auto result = graph.topologicalSort();
+    if (!result.isValid() && graph.nodeCount()) {
         QTemporaryFile tempFile(QDir::tempPath() + QLatin1String("/cyclic_depXXXXXX.dot"));
         tempFile.setAutoRemove(false);
         tempFile.open();
-        QHash<int, QString> hash;
-        for (auto it = map.cbegin(), end = map.cend(); it != end; ++it)
-            hash.insert(it.value(), it.key()->qualifiedCppName());
-        graph.dumpDot(hash, tempFile.fileName());
+        graph.dumpDot(tempFile.fileName(),
+                      [] (const AbstractMetaClass *c) { return c->name(); });
 
         QString message;
         QTextStream str(&message);
         str << "Cyclic dependency of classes found:";
-        for (int c : unmappedResult.cyclic)
-            str << ' ' <<  reverseMap.value(c)->name();
+        for (auto c : result.cyclic)
+            str << ' ' << c->name();
         str << ". Graph can be found at \"" << QDir::toNativeSeparators(tempFile.fileName()) << '"';
         qCWarning(lcShiboken, "%s", qPrintable(message));
-    } else {
-        for (int i : qAsConst(unmappedResult.result)) {
-            Q_ASSERT(reverseMap.contains(i));
-            result << reverseMap[i];
-        }
     }
 
-    return result;
+    return result.result;
 }
 
 void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)

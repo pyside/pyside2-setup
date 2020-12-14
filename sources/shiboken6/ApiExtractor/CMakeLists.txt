@@ -18,7 +18,6 @@ abstractmetalang.cpp
 documentation.cpp
 enclosingclassmixin.cpp
 fileout.cpp
-graph.cpp
 messages.cpp
 modifications.cpp
 propertyspec.cpp

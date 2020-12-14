@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the test suite of Qt for Python.
@@ -35,8 +35,8 @@ class TestTopoSort : public QObject
 {
 Q_OBJECT
 private slots:
+    void testTopoSort_data();
     void testTopoSort();
-    void testCyclicGraph();
 };
 
 #endif
