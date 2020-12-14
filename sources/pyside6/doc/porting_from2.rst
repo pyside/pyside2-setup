@@ -23,6 +23,10 @@ needs to be changed to:
     from PySide6.QtWidgets import QApplication...
     from PySide6 import QtCore
 
+
+Some classes are in a different module now, for example
+``QAction`` and ``QShortcut`` have been moved from ``QtWidgets`` to ``QtGui``.
+
 Then, the code base needs to be checked for usage of deprecated API and adapted
 accordingly. More information can be found in the
 `Porting to Qt 6 <https://doc.qt.io/qt-6/portingguide.html>`_ Guide
