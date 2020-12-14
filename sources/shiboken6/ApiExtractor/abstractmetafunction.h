@@ -121,10 +121,9 @@ public:
     bool isReverseOperator() const;
     void setReverseOperator(bool reverse);
 
-    /**
-     *  Returns true if this is a operator and the "self" operand is a pointer.
-     *  e.g. class Foo {}; operator+(SomeEnum, Foo*);
-     */
+    /// Returns true if this is a binary operator and the "self" operand is a
+    /// pointer, e.g. class Foo {}; operator+(SomeEnum, Foo*);
+    /// (not to be mixed up with DereferenceOperator).
     bool isPointerOperator() const;
     void setPointerOperator(bool value);
 
