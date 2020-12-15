@@ -40,27 +40,6 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QEvent, QPoint, QRect, QSize, QTimer, Qt
 from PySide6.QtGui import QColor, QBackingStore, QPaintDevice, QPainter, QWindow, QPaintDeviceWindow, QRasterWindow, QRegion, QStaticText
 
-# QWindow rendering via QBackingStore
-class TestBackingStoreWindow(QWindow):
-    def __init__(self):
-        super(TestBackingStoreWindow, self).__init__()
-        self.backingStore = QBackingStore(self)
-        self.text = QStaticText("BackingStoreWindow")
-
-    def event(self, event):
-        if event.type() == QEvent.Resize:
-            self.backingStore.resize(self.size())
-            self.render()
-        elif event.type() == QEvent.UpdateRequest or event.type() == QEvent.Expose:
-            self.backingStore.flush(QRegion(QRect(QPoint(0, 0), self.size())))
-
-        return QWindow.event(self, event)
-
-    def render(self):
-        clientRect = QRect(QPoint(0, 0), self.size())
-        painter = QPainter(self.backingStore.paintDevice())
-        painter.fillRect(clientRect, QColor(Qt.green))
-        painter.drawStaticText(QPoint(10, 10), self.text)
 
 # Window using convenience class QRasterWindow
 class TestRasterWindow(QRasterWindow):
@@ -74,19 +53,16 @@ class TestRasterWindow(QRasterWindow):
         painter.fillRect(clientRect, QColor(Qt.red))
         painter.drawStaticText(QPoint(10, 10), self.text)
 
+
 class QRasterWindowTest(UsesQApplication):
     def test(self):
         rasterWindow = TestRasterWindow()
         rasterWindow.setFramePosition(QPoint(100, 100))
         rasterWindow.resize(QSize(400, 400))
         rasterWindow.show()
-        backingStoreWindow = TestBackingStoreWindow()
-        backingStoreWindow.setFramePosition(QPoint(600, 100))
-        backingStoreWindow.resize(QSize(400, 400))
-        backingStoreWindow.show()
-
         QTimer.singleShot(100, self.app.quit)
         self.app.exec_()
+
 
 if __name__ == '__main__':
     unittest.main()

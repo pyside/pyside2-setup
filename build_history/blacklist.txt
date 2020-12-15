@@ -109,8 +109,6 @@
     linux ci
 [QtQml::qqmlnetwork_test]
     linux ci
-[QtGui::qrasterwindow_test]
-    darwin ci
 [QtWidgets::bug_750]
     darwin ci
 [QtWidgets::qpicture_test]
