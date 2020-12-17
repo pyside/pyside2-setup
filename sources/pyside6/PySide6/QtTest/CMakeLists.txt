@@ -2,6 +2,7 @@ project(QtTest)
 
 set(QtTest_SRC
 ${QtTest_GEN_DIR}/qtest_pysideqtoucheventsequence_wrapper.cpp
+${QtTest_GEN_DIR}/qabstractitemmodeltester_wrapper.cpp
 ${QtTest_GEN_DIR}/qtest_wrapper.cpp
 # module is always needed
 ${QtTest_GEN_DIR}/qttest_module_wrapper.cpp
