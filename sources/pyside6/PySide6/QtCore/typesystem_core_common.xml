@@ -1213,7 +1213,7 @@
             <insert-template name="return_internal_pointer" />
         </inject-code>
     </modify-function>
-    <modify-function signature="operator const QModelIndex&amp;()const">
+    <modify-function signature="operator QModelIndex()const">
         <modify-argument index="return">
             <parent index="this" action="add"/>
         </modify-argument>
@@ -2688,7 +2688,6 @@
     <modify-function signature="pop_front()" remove="all"/>
     <modify-function signature="toList()const" remove="all"/>
     <!-- Remove methods from QList -->
-    <modify-function signature="value(qsizetype,const QXmlStreamAttribute&amp;) const" remove="all"/>
     <modify-function signature="fromList(const QList&lt;QXmlStreamAttribute&gt; &amp;)" remove="all"/>
     <modify-function signature="operator+=(QVector&lt;QXmlStreamAttribute&gt;)" remove="all"/>
     <!-- Expose operator==, != inherited from QList, which the parser does
