@@ -1979,7 +1979,8 @@ void CppGenerator::writeConstructorWrapper(QTextStream &s, const AbstractMetaFun
                         Indentation indent(INDENT);
                         writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, func);
                     }
-                    s << INDENT << "}\n";
+                    s << INDENT << "}\n"
+                        << INDENT << "break;\n";
                     break;
                 }
             }
