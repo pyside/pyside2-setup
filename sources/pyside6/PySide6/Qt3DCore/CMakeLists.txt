@@ -2,7 +2,6 @@ project(Qt3DCore)
 
 set(Qt3DCore_SRC
 ${Qt3DCore_GEN_DIR}/qt3dcore_qabstractaspect_wrapper.cpp
-${Qt3DCore_GEN_DIR}/qt3dcore_qabstractfrontendnodemanager_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qabstractfunctor_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qabstractskeleton_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_qarmature_wrapper.cpp

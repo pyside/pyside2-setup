@@ -45,9 +45,6 @@
     <namespace-type name="Qt3DCore" generate-using="no">
         <enum-type name="ChangeFlag" flags="ChangeFlags"/>
         <object-type name="QAbstractAspect"/>
-        <object-type name="QAbstractFrontEndNodeManager" since="6.0">
-             <enum-type name="DirtyNodeFlag" flags="DirtyNodeSet"/>
-        </object-type>
         <object-type name="QAbstractFunctor" since="6.0"/>
         <object-type name="QAbstractSkeleton" since="5.10"/>
         <object-type name="QArmature" since="5.10"/>
@@ -106,4 +103,7 @@
             <include file-name="Qt3DCore/qtransform.h" location="global"/>
         </object-type>
     </namespace-type>
+
+    <!-- reject Qt enum helper functions in Qt3D namespaces -->
+    <rejection class="^Qt3D.*$" function-name="^qt_getEnum.*$"/>
 </typesystem>
