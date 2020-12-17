@@ -1963,7 +1963,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const AbstractMetaFunc
                         Indentation indent(s);
                         writeCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode, func);
                     }
-                    s << "}\n";
+                    s << "}\nbreak;\n";
                     break;
                 }
             }
