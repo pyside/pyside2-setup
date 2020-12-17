@@ -102,6 +102,10 @@
   </object-type>
   ^^^ this is now moved into QtGui -->
 
+  <object-type name="QAbstractItemModelTester">
+      <enum-type name="FailureReportingMode"/>
+  </object-type>
+
   <namespace-type name="QTest">
     <!-- Qt5: private <enum-type name="AttributeIndex" since="4.6"/> -->
     <enum-type name="KeyAction"/>
