@@ -1342,33 +1342,44 @@ std::optional<AbstractMetaEnumValue>
     return {};
 }
 
-/*!
- * Searches the list after a class that mathces \a name; either as
- * C++, Target language base name or complete Target language package.class name.
- */
+/// Searches the list after a class that matches \a name; either as C++,
+/// Target language base name or complete Target language package.class name.
+
+template <class It>
+static It findClassHelper(It begin, It end, const QString &name)
+{
+    if (name.isEmpty() || begin == end)
+        return end;
+
+    if (name.contains(u'.')) { // Search target lang name
+        for (auto it = begin; it != end; ++it) {
+            if ((*it)->fullName() == name)
+                return it;
+        }
+        return end;
+    }
+
+    for (auto it = begin; it != end; ++it) {
+        if ((*it)->qualifiedCppName() == name)
+            return it;
+    }
+
+    if (name.contains(u"::")) // Qualified, cannot possibly match name
+        return end;
+
+    for (auto it = begin; it != end; ++it) {
+        if ((*it)->name() == name)
+            return it;
+    }
+
+    return end;
+}
 
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
                                                 const QString &name)
 {
-    if (name.isEmpty())
-        return nullptr;
-
-    for (AbstractMetaClass *c : classes) {
-        if (c->qualifiedCppName() == name)
-            return c;
-    }
-
-    for (AbstractMetaClass *c : classes) {
-        if (c->fullName() == name)
-            return c;
-    }
-
-    for (AbstractMetaClass *c : classes) {
-        if (c->name() == name)
-            return c;
-    }
-
-    return nullptr;
+    auto it =findClassHelper(classes.cbegin(), classes.cend(), name);
+    return it != classes.cend() ? *it : nullptr;
 }
 
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
