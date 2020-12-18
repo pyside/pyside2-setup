@@ -77,8 +77,8 @@ public:
     *   Sorts a list of classes topologically.
     *   \return a list of classes sorted topologically
     */
-    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                   const Dependencies &additionalDependencies = Dependencies()) const;
+    static AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
+                                                          const Dependencies &additionalDependencies = {});
 
     bool build(const QByteArrayList &arguments,
                LanguageLevel level = LanguageLevel::Default,

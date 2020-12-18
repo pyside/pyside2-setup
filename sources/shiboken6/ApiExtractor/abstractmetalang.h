@@ -58,8 +58,6 @@ public:
     AbstractMetaClass();
     ~AbstractMetaClass();
 
-    void fixFunctions();
-
     const AbstractMetaFunctionCList &functions() const;
     void setFunctions(const AbstractMetaFunctionCList &functions);
     void addFunction(const AbstractMetaFunctionCPtr &function);
@@ -304,6 +302,12 @@ public:
 
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
+
+    // For AbstractMetaBuilder
+    void fixFunctions();
+    bool needsInheritanceSetup() const;
+    void setInheritanceDone(bool b);
+    bool inheritanceDone() const;
 
     template <class Function>
     void invisibleNamespaceRecursion(Function f) const;

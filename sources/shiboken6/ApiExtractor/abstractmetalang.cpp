@@ -57,6 +57,7 @@ public:
           m_hasNonPrivateConstructor(false),
           m_hasPrivateConstructor(false),
           m_functionsFixed(false),
+          m_inheritanceDone(false),
           m_hasPrivateDestructor(false),
           m_hasProtectedDestructor(false),
           m_hasVirtualDestructor(false),
@@ -74,6 +75,7 @@ public:
     uint m_hasNonPrivateConstructor : 1;
     uint m_hasPrivateConstructor : 1;
     uint m_functionsFixed : 1;
+    uint m_inheritanceDone : 1; // m_baseClasses has been populated from m_baseClassNames
     uint m_hasPrivateDestructor : 1;
     uint m_hasProtectedDestructor : 1;
     uint m_hasVirtualDestructor : 1;
@@ -425,6 +427,7 @@ AbstractMetaClass *AbstractMetaClass::baseClass() const
 
 const AbstractMetaClassList &AbstractMetaClass::baseClasses() const
 {
+    Q_ASSERT(inheritanceDone() || !needsInheritanceSetup());
     return d->m_baseClasses;
 }
 
@@ -1293,6 +1296,30 @@ void AbstractMetaClass::fixFunctions()
     }
 
     setFunctions(funcs);
+}
+
+bool AbstractMetaClass::needsInheritanceSetup() const
+{
+    if (d->m_typeEntry != nullptr) {
+        switch (d->m_typeEntry->type()) {
+        case TypeEntry::NamespaceType:
+        case TypeEntry::SmartPointerType:
+            return false;
+        default:
+            break;
+        }
+    }
+    return true;
+}
+
+void AbstractMetaClass::setInheritanceDone(bool b)
+{
+    d->m_inheritanceDone = b;
+}
+
+bool AbstractMetaClass::inheritanceDone() const
+{
+    return d->m_inheritanceDone;
 }
 
 /*******************************************************************************

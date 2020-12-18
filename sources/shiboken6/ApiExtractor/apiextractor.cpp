@@ -149,7 +149,8 @@ const AbstractMetaClassList &ApiExtractor::smartPointers() const
 AbstractMetaClassList ApiExtractor::classesTopologicalSorted(const Dependencies &additionalDependencies) const
 {
     Q_ASSERT(m_builder);
-    return m_builder->classesTopologicalSorted(m_builder->classes(), additionalDependencies);
+    return AbstractMetaBuilder::classesTopologicalSorted(m_builder->classes(),
+                                                         additionalDependencies);
 }
 
 PrimitiveTypeEntryList ApiExtractor::primitiveTypes() const

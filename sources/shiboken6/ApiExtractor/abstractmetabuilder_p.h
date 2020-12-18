@@ -67,8 +67,8 @@ public:
     void traverseDom(const FileModelItem &dom);
 
     void dumpLog() const;
-    AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                   const Dependencies &additionalDependencies = Dependencies()) const;
+    static AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
+                                                          const Dependencies &additionalDependencies = {});
     NamespaceModelItem popScope() { return m_scopes.takeLast(); }
 
     void pushScope(const NamespaceModelItem &item);
@@ -205,8 +205,6 @@ public:
     QHash<const TypeEntry *, AbstractMetaEnum> m_enums;
 
     QList<NamespaceModelItem> m_scopes;
-
-    QSet<AbstractMetaClass *> m_setupInheritanceDone;
 
     QString m_logDirectory;
     QFileInfoList m_globalHeaders;

@@ -456,7 +456,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     ReportHandler::startProgress("Fixing class inheritance...");
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
-        if (!cls->isNamespace()) {
+        if (cls->needsInheritanceSetup()) {
             setupInheritance(cls);
             if (cls->templateBaseClass())
                 inheritTemplateFunctions(cls);
@@ -1419,10 +1419,10 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
 
 bool AbstractMetaBuilderPrivate::setupInheritance(AbstractMetaClass *metaClass)
 {
-    if (m_setupInheritanceDone.contains(metaClass))
+    if (metaClass->inheritanceDone())
         return true;
 
-    m_setupInheritanceDone.insert(metaClass);
+    metaClass->setInheritanceDone(true);
 
     QStringList baseClasses = metaClass->baseClassNames();
 
@@ -2590,6 +2590,9 @@ AbstractMetaClass* AbstractMetaBuilderPrivate::findTemplateClass(const QString &
 
 AbstractMetaClassList AbstractMetaBuilderPrivate::getBaseClasses(const AbstractMetaClass *metaClass) const
 {
+    // Shortcut if inheritance has already been set up
+    if (metaClass->inheritanceDone() || !metaClass->needsInheritanceSetup())
+        return metaClass->baseClasses();
     AbstractMetaClassList baseClasses;
     const QStringList &baseClassNames = metaClass->baseClassNames();
     for (const QString& parent : baseClassNames) {
@@ -3015,7 +3018,7 @@ static bool addClassDependency(const AbstractMetaClassList &classList,
 }
 
 AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                                           const Dependencies &additionalDependencies) const
+                                                                           const Dependencies &additionalDependencies)
 {
     ClassGraph graph(classList.cbegin(), classList.cend());
 
@@ -3033,8 +3036,7 @@ AbstractMetaClassList AbstractMetaBuilderPrivate::classesTopologicalSorted(const
             graph.addEdge(enclosing, clazz);
         }
 
-        const AbstractMetaClassList &bases = getBaseClasses(clazz);
-        for (AbstractMetaClass *baseClass : bases)
+        for (auto baseClass : clazz->baseClasses())
             graph.addEdge(baseClass, clazz);
 
         for (const auto &func : clazz->functions()) {
@@ -3101,9 +3103,9 @@ void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)
 }
 
 AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                                    const Dependencies &additionalDependencies) const
+                                                                    const Dependencies &additionalDependencies)
 {
-    return d->classesTopologicalSorted(classList, additionalDependencies);
+    return AbstractMetaBuilderPrivate::classesTopologicalSorted(classList, additionalDependencies);
 }
 
 AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractMetaArgumentList &list)
