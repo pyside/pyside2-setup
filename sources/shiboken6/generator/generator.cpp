@@ -282,24 +282,25 @@ void Generator::addInstantiatedContainersAndSmartPointers(const AbstractMetaType
         return;
 
     }
-    QString typeName = getSimplifiedContainerTypeName(type);
     if (isContainer) {
+        const QString typeName = getSimplifiedContainerTypeName(type);
         if (!m_d->instantiatedContainersNames.contains(typeName)) {
             m_d->instantiatedContainersNames.append(typeName);
             m_d->instantiatedContainers.append(type);
         }
-    } else {
-        // Is smart pointer. Check if the (const?) pointee is already known
-        auto pt = pointeeTypeEntry(type);
-        const bool present =
-            std::any_of(m_d->instantiatedSmartPointers.cbegin(), m_d->instantiatedSmartPointers.cend(),
-                        [pt] (const AbstractMetaType &t) {
-                            return pointeeTypeEntry(t) == pt;
-                        });
-        if (!present)
-            m_d->instantiatedSmartPointers.append(canonicalSmartPtrInstantiation(type));
+        return;
     }
 
+    // Is smart pointer. Check if the (const?) pointee is already known for the given
+    // smart pointer type entry.
+    auto pt = pointeeTypeEntry(type);
+    const bool present =
+        std::any_of(m_d->instantiatedSmartPointers.cbegin(), m_d->instantiatedSmartPointers.cend(),
+                    [typeEntry, pt] (const AbstractMetaType &t) {
+                        return t.typeEntry() == typeEntry && pointeeTypeEntry(t) == pt;
+                    });
+    if (!present)
+        m_d->instantiatedSmartPointers.append(canonicalSmartPtrInstantiation(type));
 }
 
 void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMetaFunctionCPtr &func)
