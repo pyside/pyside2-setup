@@ -362,11 +362,6 @@ const AbstractMetaClassList &Generator::invisibleTopNamespaces() const
     return m_d->m_invisibleTopNamespaces;
 }
 
-AbstractMetaClassList Generator::classesTopologicalSorted(const Dependencies &additionalDependencies) const
-{
-    return m_d->apiextractor->classesTopologicalSorted(additionalDependencies);
-}
-
 const AbstractMetaFunctionCList &Generator::globalFunctions() const
 {
     return m_d->apiextractor->globalFunctions();

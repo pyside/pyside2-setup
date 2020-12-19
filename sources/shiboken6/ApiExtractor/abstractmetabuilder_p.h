@@ -30,6 +30,7 @@
 #define ABSTRACTMETABUILDER_P_H
 
 #include "abstractmetabuilder.h"
+#include "dependency.h"
 #include "parser/codemodel_fwd.h"
 #include "abstractmetalang.h"
 #include "abstractmetatype.h"

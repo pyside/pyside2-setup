@@ -31,7 +31,6 @@
 
 #include <abstractmetatype.h>
 #include <typedatabase_typedefs.h>
-#include <dependency.h>
 #include <QtCore/QObject>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QTextStream>
@@ -270,12 +269,6 @@ public:
     AbstractMetaFunctionCList implicitConversions(const AbstractMetaType &metaType) const;
 
 protected:
-    /// Returns the classes, topologically ordered, used to generate the binding code.
-    ///
-    /// The classes are ordered such that derived classes appear later in the list than
-    /// their parent classes.
-    AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;
-
     /// Returns all global functions found by APIExtractor
     const AbstractMetaFunctionCList &globalFunctions() const;
 

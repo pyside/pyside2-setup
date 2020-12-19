@@ -29,7 +29,6 @@
 #ifndef APIEXTRACTOR_H
 #define APIEXTRACTOR_H
 
-#include "dependency.h"
 #include "abstractmetalang_typedefs.h"
 #include "header_paths.h"
 #include "typedatabase_typedefs.h"
@@ -86,7 +85,6 @@ public:
     const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaClassList &classes() const;
     const AbstractMetaClassList &smartPointers() const;
-    AbstractMetaClassList classesTopologicalSorted(const Dependencies &additionalDependencies = Dependencies()) const;
     PrimitiveTypeEntryList primitiveTypes() const;
     ContainerTypeEntryList containerTypes() const;
 

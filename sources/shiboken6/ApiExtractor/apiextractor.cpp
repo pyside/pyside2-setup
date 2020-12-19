@@ -146,13 +146,6 @@ const AbstractMetaClassList &ApiExtractor::smartPointers() const
     return m_builder->smartPointers();
 }
 
-AbstractMetaClassList ApiExtractor::classesTopologicalSorted(const Dependencies &additionalDependencies) const
-{
-    Q_ASSERT(m_builder);
-    return AbstractMetaBuilder::classesTopologicalSorted(m_builder->classes(),
-                                                         additionalDependencies);
-}
-
 PrimitiveTypeEntryList ApiExtractor::primitiveTypes() const
 {
     return TypeDatabase::instance()->primitiveTypes();

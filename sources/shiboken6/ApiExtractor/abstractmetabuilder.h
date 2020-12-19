@@ -31,7 +31,6 @@
 
 #include "abstractmetalang_typedefs.h"
 #include "header_paths.h"
-#include "dependency.h"
 #include "typesystem_enums.h"
 
 #include "clangparser/compilersupport.h"
@@ -72,13 +71,6 @@ public:
     const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaEnumList &globalEnums() const;
     std::optional<AbstractMetaEnum> findEnum(const TypeEntry *typeEntry) const;
-
-    /**
-    *   Sorts a list of classes topologically.
-    *   \return a list of classes sorted topologically
-    */
-    static AbstractMetaClassList classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                          const Dependencies &additionalDependencies = {});
 
     bool build(const QByteArrayList &arguments,
                LanguageLevel level = LanguageLevel::Default,

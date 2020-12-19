@@ -5929,21 +5929,7 @@ bool CppGenerator::finishGeneration()
         writeMethodDefinition(s_globalFunctionDef, overloads);
     }
 
-    //this is a temporary solution before new type revison implementation
-    //We need move QMetaObject register before QObject
-    Dependencies additionalDependencies;
-    const AbstractMetaClassList &allClasses = classes();
-    if (auto qObjectClass = AbstractMetaClass::findClass(allClasses, qObjectT())) {
-        if (auto qMetaObjectClass = AbstractMetaClass::findClass(allClasses, qMetaObjectT())) {
-            Dependency dependency;
-            dependency.parent = qMetaObjectClass;
-            dependency.child = qObjectClass;
-            additionalDependencies.append(dependency);
-        }
-    }
-    const AbstractMetaClassList lst = classesTopologicalSorted(additionalDependencies);
-
-    for (const AbstractMetaClass *cls : lst){
+    for (const AbstractMetaClass *cls : classes()){
         if (shouldGenerate(cls)) {
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
                           getSimpleClassInitFunctionName(cls),

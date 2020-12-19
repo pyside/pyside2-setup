@@ -345,10 +345,41 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
     return true;
 }
 
+static bool metaEnumLessThan(const AbstractMetaEnum &e1, const AbstractMetaEnum &e2)
+{ return e1.fullName() < e2.fullName(); }
+
+static bool metaClassLessThan(const AbstractMetaClass *c1, const AbstractMetaClass *c2)
+{ return c1->fullName() < c2->fullName(); }
+
+static bool metaFunctionLessThan(const AbstractMetaFunctionCPtr &f1, const AbstractMetaFunctionCPtr &f2)
+{ return f1->name() < f2->name(); }
+
 void AbstractMetaBuilderPrivate::sortLists()
 {
+    // Ensure indepedent classes are in alphabetical order,
+    std::sort(m_metaClasses.begin(), m_metaClasses.end(), metaClassLessThan);
+    // this is a temporary solution before new type revision implementation
+    // We need move QMetaObject register before QObject.
+    Dependencies additionalDependencies;
+    if (auto qObjectClass = AbstractMetaClass::findClass(m_metaClasses, QStringLiteral("QObject"))) {
+        if (auto qMetaObjectClass = AbstractMetaClass::findClass(m_metaClasses, QStringLiteral("QMetaObject"))) {
+            Dependency dependency;
+            dependency.parent = qMetaObjectClass;
+            dependency.child = qObjectClass;
+            additionalDependencies.append(dependency);
+        }
+    }
+    m_metaClasses = classesTopologicalSorted(m_metaClasses, additionalDependencies);
+
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses))
         cls->sortFunctions();
+
+    // Ensure that indexes are in alphabetical order, roughly, except
+    // for classes, which are in topological order
+    std::sort(m_globalEnums.begin(), m_globalEnums.end(), metaEnumLessThan);
+    std::sort(m_templates.begin(), m_templates.end(), metaClassLessThan);
+    std::sort(m_smartPointers.begin(), m_smartPointers.end(), metaClassLessThan);
+    std::sort(m_globalFunctions.begin(), m_globalFunctions.end(), metaFunctionLessThan);
 }
 
 FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
@@ -560,9 +591,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
 
     ReportHandler::startProgress("Writing log files...");
 
-    // sort all classes topologically
-    m_metaClasses = classesTopologicalSorted(m_metaClasses);
-
     for (AbstractMetaClass *cls : qAsConst(m_metaClasses)) {
 //         setupEquals(cls);
 //         setupComparable(cls);
@@ -595,15 +623,6 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom)
     ReportHandler::endProgress();
 }
 
-static bool metaEnumLessThan(const AbstractMetaEnum &e1, const AbstractMetaEnum &e2)
-{ return e1.fullName() < e2.fullName(); }
-
-static bool metaClassLessThan(const AbstractMetaClass *c1, const AbstractMetaClass *c2)
-{ return c1->fullName() < c2->fullName(); }
-
-static bool metaFunctionLessThan(const AbstractMetaFunctionCPtr &f1, const AbstractMetaFunctionCPtr &f2)
-{ return f1->name() < f2->name(); }
-
 bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
                                 LanguageLevel level,
                                 unsigned clangFlags)
@@ -614,13 +633,6 @@ bool AbstractMetaBuilder::build(const QByteArrayList &arguments,
     if (ReportHandler::isDebug(ReportHandler::MediumDebug))
         qCDebug(lcShiboken) << dom.data();
     d->traverseDom(dom);
-
-    // Ensure that indexes are in alphabetical order, roughly
-    std::sort(d->m_globalEnums.begin(), d->m_globalEnums.end(), metaEnumLessThan);
-    std::sort(d->m_metaClasses.begin(), d->m_metaClasses.end(), metaClassLessThan);
-    std::sort(d->m_templates.begin(), d->m_templates.end(), metaClassLessThan);
-    std::sort(d->m_smartPointers.begin(), d->m_smartPointers.end(), metaClassLessThan);
-    std::sort(d->m_globalFunctions.begin(), d->m_globalFunctions.end(), metaFunctionLessThan);
 
     return true;
 }
@@ -3100,12 +3112,6 @@ void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)
     } else {
         m_scopes << item;
     }
-}
-
-AbstractMetaClassList AbstractMetaBuilder::classesTopologicalSorted(const AbstractMetaClassList &classList,
-                                                                    const Dependencies &additionalDependencies)
-{
-    return AbstractMetaBuilderPrivate::classesTopologicalSorted(classList, additionalDependencies);
 }
 
 AbstractMetaArgumentList AbstractMetaBuilderPrivate::reverseList(const AbstractMetaArgumentList &list)
