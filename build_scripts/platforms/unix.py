@@ -146,10 +146,11 @@ def prepare_packages_posix(self, vars):
                 filter=None, recursive=True,
                 force=False, vars=vars))
         else:
-            copyfile(
-                "{install_dir}/bin/designer",
-                "{st_build_dir}/{st_package_name}/designer",
-                force=False, vars=vars)
+            executables.extend(copydir(
+                "{install_dir}/bin/",
+                "{st_build_dir}/{st_package_name}/",
+                filter=["designer"],
+                force=False, vars=vars))
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
