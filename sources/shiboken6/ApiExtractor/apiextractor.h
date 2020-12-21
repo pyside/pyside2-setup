@@ -39,6 +39,7 @@
 
 #include <optional>
 
+class ApiExtractorResult;
 class AbstractMetaBuilder;
 class AbstractMetaClass;
 class AbstractMetaEnum;
@@ -86,12 +87,11 @@ public:
     const AbstractMetaClassList &classes() const;
     const AbstractMetaClassList &smartPointers() const;
 
-    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry* typeEntry) const;
+    std::optional<ApiExtractorResult> run(bool usePySideExtensions);
 
-    int classCount() const;
-
-    bool run(bool usePySideExtensions);
 private:
+    bool runHelper(bool usePySideExtensions);
+
     QString m_typeSystemFileName;
     QFileInfoList m_cppFileNames;
     HeaderPaths m_includePaths;

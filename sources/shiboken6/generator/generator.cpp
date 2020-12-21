@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "generator.h"
+#include "apiextractorresult.h"
 #include "ctypenames.h"
 #include "abstractmetaenum.h"
 #include "abstractmetafield.h"
@@ -168,7 +169,7 @@ QString GeneratorContext::smartPointerWrapperName() const
 
 struct Generator::GeneratorPrivate
 {
-    const ApiExtractor *apiextractor = nullptr;
+    ApiExtractorResult api;
     QString outDir;
     // License comment
     QString licenseComment;
@@ -188,9 +189,9 @@ Generator::~Generator()
     delete m_d;
 }
 
-bool Generator::setup(const ApiExtractor &extractor)
+bool Generator::setup(const ApiExtractorResult &api)
 {
-    m_d->apiextractor = &extractor;
+    m_d->api = api;
     const auto moduleEntry = TypeDatabase::instance()->defaultTypeSystemType();
     if (!moduleEntry || !moduleEntry->generateCode()) {
         qCWarning(lcShiboken) << "Couldn't find the package name!!";
@@ -199,7 +200,7 @@ bool Generator::setup(const ApiExtractor &extractor)
 
     collectInstantiatedContainersAndSmartPointers();
 
-    for (auto c : classes()) {
+    for (auto c : api.classes()) {
         if (c->enclosingClass() == nullptr && c->isInvisibleNamespace()) {
             m_d->m_invisibleTopNamespaces.append(c);
             c->invisibleNamespaceRecursion([&](AbstractMetaClass *ic) {
@@ -326,9 +327,9 @@ void Generator::collectInstantiatedContainersAndSmartPointers(const AbstractMeta
 
 void Generator::collectInstantiatedContainersAndSmartPointers()
 {
-    for (const auto &func : globalFunctions())
+    for (const auto &func : m_d->api.globalFunctions())
         collectInstantiatedContainersAndSmartPointers(func);
-    for (const AbstractMetaClass *metaClass : classes())
+    for (auto metaClass : m_d->api.classes())
         collectInstantiatedContainersAndSmartPointers(metaClass);
 }
 
@@ -352,24 +353,9 @@ bool Generator::handleOption(const QString & /* key */, const QString & /* value
     return false;
 }
 
-const AbstractMetaClassList &Generator::classes() const
-{
-    return m_d->apiextractor->classes();
-}
-
 const AbstractMetaClassList &Generator::invisibleTopNamespaces() const
 {
     return m_d->m_invisibleTopNamespaces;
-}
-
-const AbstractMetaFunctionCList &Generator::globalFunctions() const
-{
-    return m_d->apiextractor->globalFunctions();
-}
-
-const AbstractMetaEnumList &Generator::globalEnums() const
-{
-    return m_d->apiextractor->globalEnums();
 }
 
 PrimitiveTypeEntryList Generator::primitiveTypes()
@@ -380,18 +366,6 @@ PrimitiveTypeEntryList Generator::primitiveTypes()
 ContainerTypeEntryList Generator::containerTypes()
 {
     return TypeDatabase::instance()->containerTypes();
-}
-
-std::optional<AbstractMetaEnum>
-    Generator::findAbstractMetaEnum(const TypeEntry *typeEntry) const
-{
-    return m_d->apiextractor->findAbstractMetaEnum(typeEntry);
-}
-
-std::optional<AbstractMetaEnum>
-    Generator::findAbstractMetaEnum(const AbstractMetaType &metaType) const
-{
-    return m_d->apiextractor->findAbstractMetaEnum(metaType.typeEntry());
 }
 
 QString Generator::licenseComment() const
@@ -479,13 +453,12 @@ GeneratorContext Generator::contextForSmartPointer(const AbstractMetaClass *c,
 
 bool Generator::generate()
 {
-    const AbstractMetaClassList &classList = m_d->apiextractor->classes();
-    for (AbstractMetaClass *cls : classList) {
+    for (auto cls : m_d->api.classes()) {
         if (!generateFileForContext(contextForClass(cls)))
             return false;
     }
 
-    const auto smartPointers = m_d->apiextractor->smartPointers();
+    const auto smartPointers = m_d->api.smartPointers();
     for (const AbstractMetaType &type : qAsConst(m_d->instantiatedSmartPointers)) {
         AbstractMetaClass *smartPointerClass =
             AbstractMetaClass::findClass(smartPointers, type.typeEntry());
@@ -522,18 +495,9 @@ void verifyDirectoryFor(const QString &file)
     }
 }
 
-AbstractMetaFunctionCList Generator::implicitConversions(const TypeEntry *type) const
+const ApiExtractorResult &Generator::api() const
 {
-    if (type->isValue()) {
-        if (const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), type))
-            return metaClass->implicitConversions();
-    }
-    return {};
-}
-
-AbstractMetaFunctionCList Generator::implicitConversions(const AbstractMetaType &metaType) const
-{
-    return implicitConversions(metaType.typeEntry());
+    return m_d->api;
 }
 
 QString Generator::getFullTypeName(const TypeEntry *type)
@@ -594,8 +558,9 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
 }
 
 std::optional<DefaultValue>
-    Generator::minimalConstructor(const AbstractMetaType &type,
-                                  QString *errorString) const
+    Generator::minimalConstructor(const ApiExtractorResult &api,
+                                  const AbstractMetaType &type,
+                                  QString *errorString)
 {
     if (type.referenceType() == LValueReference && type.isObjectType())
         return {};
@@ -621,19 +586,19 @@ std::optional<DefaultValue>
         return DefaultValue(DefaultValue::Pointer, QLatin1String("::") + type.typeEntry()->qualifiedCppName());
 
     if (type.typeEntry()->isSmartPointer())
-        return minimalConstructor(type.typeEntry());
+        return minimalConstructor(api, type.typeEntry());
 
     if (type.typeEntry()->isComplex()) {
         auto cType = static_cast<const ComplexTypeEntry *>(type.typeEntry());
         if (cType->hasDefaultConstructor())
             return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
-        auto klass = AbstractMetaClass::findClass(classes(), cType);
+        auto klass = AbstractMetaClass::findClass(api.classes(), cType);
         if (!klass) {
             if (errorString != nullptr)
                 *errorString = msgClassNotFound(cType);
             return {};
         }
-        auto ctorO = minimalConstructor(klass);
+        auto ctorO = minimalConstructor(api, klass);
         if (ctorO.has_value() && type.hasInstantiations()) {
             auto ctor = ctorO.value();
             QString v = ctor.value();
@@ -644,12 +609,13 @@ std::optional<DefaultValue>
         return ctorO;
     }
 
-    return minimalConstructor(type.typeEntry(), errorString);
+    return minimalConstructor(api, type.typeEntry(), errorString);
 }
 
 std::optional<DefaultValue>
-   Generator::minimalConstructor(const TypeEntry *type,
-                                 QString *errorString) const
+   Generator::minimalConstructor(const ApiExtractorResult &api,
+                                 const TypeEntry *type,
+                                 QString *errorString)
 {
     if (!type)
         return {};
@@ -691,13 +657,13 @@ std::optional<DefaultValue>
         return DefaultValue(DefaultValue::DefaultConstructor, type->qualifiedCppName());
 
     if (type->isComplex()) {
-        auto klass = AbstractMetaClass::findClass(classes(), type);
+        auto klass = AbstractMetaClass::findClass(api.classes(), type);
         if (!klass) {
             if (errorString != nullptr)
                 *errorString = msgClassNotFound(type);
             return {};
         }
-        return minimalConstructor(klass, errorString);
+        return minimalConstructor(api, klass, errorString);
     }
 
     if (errorString != nullptr)
@@ -712,8 +678,9 @@ static QString constructorCall(const QString &qualifiedCppName, const QStringLis
 }
 
 std::optional<DefaultValue>
-    Generator::minimalConstructor(const AbstractMetaClass *metaClass,
-                                  QString *errorString) const
+    Generator::minimalConstructor(const ApiExtractorResult &api,
+                                  const AbstractMetaClass *metaClass,
+                                  QString *errorString)
 {
     if (!metaClass)
         return {};
@@ -766,7 +733,7 @@ std::optional<DefaultValue>
             }
             if (arg.hasOriginalDefaultValueExpression())
                 break;
-            auto argValue = minimalConstructor(arg.type(), errorString);
+            auto argValue = minimalConstructor(api, arg.type(), errorString);
             if (!argValue.has_value())
                 return {};
             args << argValue->constructorParameter();
@@ -784,7 +751,7 @@ bool Generator::useEnumAsIntForProtectedHack(const AbstractMetaType &metaType) c
         return true;
     if (!metaType.isEnum())
         return false;
-    auto metaEnum = findAbstractMetaEnum(metaType);
+    auto metaEnum = m_d->api.findAbstractMetaEnum(metaType.typeEntry());
     if (!metaEnum.has_value())
         return true;
     if (metaEnum->attributes() & AbstractMetaAttributes::Public) // No reason, type is public

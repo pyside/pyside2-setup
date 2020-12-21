@@ -58,8 +58,10 @@ private:
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaClass *cppClass) const;
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType) const;
-    void writeTypeIndexValueLine(TextStream &s, const TypeEntry *typeEntry) const;
-    void writeTypeIndexValueLines(TextStream &s, const AbstractMetaClass *metaClass) const;
+    static void writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
+                                        const TypeEntry *typeEntry);
+    static void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
+                                         const AbstractMetaClass *metaClass);
     void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     void writeInheritedOverloads(TextStream &s) const;
 

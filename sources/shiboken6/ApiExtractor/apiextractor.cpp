@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "apiextractor.h"
+#include "apiextractorresult.h"
 #include "abstractmetalang.h"
 
 #include <QDir>
@@ -146,18 +147,6 @@ const AbstractMetaClassList &ApiExtractor::smartPointers() const
     return m_builder->smartPointers();
 }
 
-std::optional<AbstractMetaEnum>
-    ApiExtractor::findAbstractMetaEnum(const TypeEntry* typeEntry) const
-{
-    return m_builder->findEnum(typeEntry);
-}
-
-int ApiExtractor::classCount() const
-{
-    Q_ASSERT(m_builder);
-    return m_builder->classes().count();
-}
-
 // Add defines required for parsing Qt code headers
 static void addPySideExtensions(QByteArrayList *a)
 {
@@ -176,7 +165,7 @@ static void addPySideExtensions(QByteArrayList *a)
     a->append(QByteArrayLiteral("-DQSIMD_H"));
 }
 
-bool ApiExtractor::run(bool usePySideExtensions)
+bool ApiExtractor::runHelper(bool usePySideExtensions)
 {
     if (m_builder)
         return false;
@@ -230,6 +219,19 @@ bool ApiExtractor::run(bool usePySideExtensions)
         ppFile.setAutoRemove(false);
         std::cerr << "Keeping temporary file: " << qPrintable(QDir::toNativeSeparators(preprocessedCppFileName)) << '\n';
     }
+    return result;
+}
+
+std::optional<ApiExtractorResult> ApiExtractor::run(bool usePySideExtensions)
+{
+    if (!runHelper(usePySideExtensions))
+        return {};
+    ApiExtractorResult result;
+    result.m_metaClasses = m_builder->classes();
+    result.m_smartPointers = m_builder->smartPointers();
+    result.m_globalFunctions = m_builder->globalFunctions();
+    result.m_globalEnums = m_builder->globalEnums();
+    result.m_enums = m_builder->typeEntryToEnumsHash();
     return result;
 }
 

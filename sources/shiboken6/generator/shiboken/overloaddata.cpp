@@ -27,12 +27,13 @@
 ****************************************************************************/
 
 #include <abstractmetafunction.h>
+#include <apiextractorresult.h>
 #include <abstractmetalang.h>
 #include <reporthandler.h>
+#include <typesystem.h>
 #include <graph.h>
 #include "overloaddata.h"
 #include "ctypenames.h"
-#include "shibokengenerator.h"
 #include "textstream.h"
 
 #include <QtCore/QDir>
@@ -239,7 +240,7 @@ void OverloadData::sortNextOverloads()
                 for (const QString &primitive : qAsConst(nonIntegerPrimitives))
                     graph.addNode(getImplicitConversionTypeName(ov->argType(), instantiation, nullptr, primitive));
             } else {
-                const auto &funcs = m_generator->implicitConversions(instantiation);
+                const auto &funcs = m_api.implicitConversions(instantiation);
                 for (const auto &function : funcs)
                     graph.addNode(getImplicitConversionTypeName(ov->argType(), instantiation, function));
             }
@@ -271,7 +272,7 @@ void OverloadData::sortNextOverloads()
         const QString targetTypeEntryName = getTypeName(ov);
 
         // Process implicit conversions
-        const auto &functions = m_generator->implicitConversions(targetType);
+        const auto &functions = m_api.implicitConversions(targetType);
         for (const auto &function : functions) {
             QString convertibleType;
             if (function->isConversionOperator())
@@ -294,7 +295,8 @@ void OverloadData::sortNextOverloads()
 
         // Process inheritance relationships
         if (targetType.isValue() || targetType.isObject()) {
-            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), targetType.typeEntry());
+            auto metaClass = AbstractMetaClass::findClass(m_api.classes(),
+                                                          targetType.typeEntry());
             const AbstractMetaClassList &ancestors = metaClass->allTypeSystemAncestors();
             for (const AbstractMetaClass *ancestor : ancestors) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();
@@ -322,7 +324,7 @@ void OverloadData::sortNextOverloads()
                     }
 
                 } else {
-                    const auto &funcs = m_generator->implicitConversions(instantiation);
+                    const auto &funcs = m_api.implicitConversions(instantiation);
                     for (const auto &function : funcs) {
                         QString convertibleTypeName =
                             getImplicitConversionTypeName(ov->argType(), instantiation, function);
@@ -441,9 +443,11 @@ void OverloadData::sortNextOverloads()
  *                    \- int
  *
  */
-OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads, const ShibokenGenerator *generator)
+OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads,
+                           const ApiExtractorResult &api)
     : m_minArgs(256), m_maxArgs(0), m_argPos(-1), m_argType(nullptr),
-    m_headOverloadData(this), m_previousOverloadData(nullptr), m_generator(generator)
+    m_headOverloadData(this), m_previousOverloadData(nullptr),
+    m_api(api)
 {
     for (const auto &func : overloads) {
         m_overloads.append(func);
@@ -471,10 +475,10 @@ OverloadData::OverloadData(const AbstractMetaFunctionCList &overloads, const Shi
 }
 
 OverloadData::OverloadData(OverloadData *headOverloadData, const AbstractMetaFunctionCPtr &func,
-                                 const AbstractMetaType &argType, int argPos)
-    : m_minArgs(256), m_maxArgs(0), m_argPos(argPos), m_argType(argType),
-      m_headOverloadData(headOverloadData), m_previousOverloadData(nullptr),
-      m_generator(nullptr)
+                           const AbstractMetaType &argType, int argPos,
+                           const ApiExtractorResult &api) :
+      m_minArgs(256), m_maxArgs(0), m_argPos(argPos), m_argType(argType),
+      m_headOverloadData(headOverloadData), m_previousOverloadData(nullptr), m_api(api)
 {
     if (func)
         this->addOverload(func);
@@ -527,9 +531,8 @@ OverloadData *OverloadData::addOverloadData(const AbstractMetaFunctionCPtr &func
     }
 
     if (!overloadData) {
-        overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1);
+        overloadData = new OverloadData(m_headOverloadData, func, argType, m_argPos + 1, m_api);
         overloadData->m_previousOverloadData = this;
-        overloadData->m_generator = this->m_generator;
         QString typeReplaced = func->typeReplaced(arg.argumentIndex() + 1);
 
         if (!typeReplaced.isEmpty())

@@ -67,9 +67,9 @@ private:
                                    const QString &funcName, const CodeSnipList &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntry *retType,
                                    const QString &returnStatement) const;
-    QString virtualMethodReturn(TextStream &s,
-                                const AbstractMetaFunctionCPtr &func,
-                                const FunctionModificationList &functionModifications) const;
+    static QString virtualMethodReturn(TextStream &s, const ApiExtractorResult &api,
+                                       const AbstractMetaFunctionCPtr &func,
+                                       const FunctionModificationList &functionModifications);
     void writeMetaObjectMethod(TextStream &s, const GeneratorContext &classContext) const;
     void writeMetaCast(TextStream &s, const GeneratorContext &classContext) const;
 
@@ -269,9 +269,10 @@ private:
                                       bool usePyArgs, const OverloadData &overloadData) const;
 
     /// Returns a string containing the name of an argument for the given function and argument index.
-    QString argumentNameFromIndex(const AbstractMetaFunctionCPtr &func, int argIndex,
-                                  const AbstractMetaClass **wrappedClass,
-                                  QString *errorMessage = nullptr) const;
+    static QString argumentNameFromIndex(const ApiExtractorResult &api,
+                                         const AbstractMetaFunctionCPtr &func, int argIndex,
+                                         const AbstractMetaClass **wrappedClass,
+                                         QString *errorMessage = nullptr);
     void writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                          const GeneratorContext &context, int maxArgs = 0) const;
 

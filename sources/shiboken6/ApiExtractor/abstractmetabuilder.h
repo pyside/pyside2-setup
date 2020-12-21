@@ -70,7 +70,7 @@ public:
     const AbstractMetaClassList &smartPointers() const;
     const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaEnumList &globalEnums() const;
-    std::optional<AbstractMetaEnum> findEnum(const TypeEntry *typeEntry) const;
+    const QHash<const TypeEntry *, AbstractMetaEnum> &typeEntryToEnumsHash() const;
 
     bool build(const QByteArrayList &arguments,
                LanguageLevel level = LanguageLevel::Default,

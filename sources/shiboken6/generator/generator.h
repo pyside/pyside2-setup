@@ -38,8 +38,7 @@
 
 #include <optional>
 
-class ApiExtractor;
-class AbstractMetaBuilder;
+class ApiExtractorResult;
 class AbstractMetaFunction;
 class AbstractMetaClass;
 class AbstractMetaEnum;
@@ -212,13 +211,10 @@ public:
     Generator();
     virtual ~Generator();
 
-    bool setup(const ApiExtractor &extractor);
+    bool setup(const ApiExtractorResult &api);
 
     virtual OptionDescriptions options() const;
     virtual bool handleOption(const QString &key, const QString &value);
-
-    /// Returns the classes used to generate the binding code.
-    const AbstractMetaClassList &classes() const;
 
     /// Returns the top namespace made invisible
     const AbstractMetaClassList &invisibleTopNamespaces() const;
@@ -246,6 +242,9 @@ public:
     /// Returns the generator's name. Used for cosmetic purposes.
     virtual const char *name() const = 0;
 
+    /// Returns the API as determined by ApiExtractor
+    const ApiExtractorResult &api() const;
+
     /**
      *  Retrieves the name of the currently processed module.
      *  While package name is a complete package idetification, e.g. 'PySide.QtCore',
@@ -256,36 +255,12 @@ public:
      */
     QString moduleName() const;
 
-    /**
-     *   Retrieves a list of constructors used in implicit conversions
-     *   available on the given type. The TypeEntry must be a value-type
-     *   or else it will return an empty list.
-     *   \param type a TypeEntry that is expected to be a value-type
-     *   \return a list of constructors that could be used as implicit converters
-     */
-    AbstractMetaFunctionCList implicitConversions(const TypeEntry *type) const;
-
-    /// Convenience function for implicitConversions(const TypeEntry *type).
-    AbstractMetaFunctionCList implicitConversions(const AbstractMetaType &metaType) const;
-
 protected:
-    /// Returns all global functions found by APIExtractor
-    const AbstractMetaFunctionCList &globalFunctions() const;
-
-    /// Returns all global enums found by APIExtractor
-    const AbstractMetaEnumList &globalEnums() const;
-
     /// Returns all primitive types found by APIExtractor
     static PrimitiveTypeEntryList primitiveTypes();
 
     /// Returns all container types found by APIExtractor
     static ContainerTypeEntryList containerTypes();
-
-    /// Returns an AbstractMetaEnum for a given TypeEntry that is an EnumTypeEntry, or nullptr if not found.
-    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry *typeEntry) const;
-
-    /// Returns an AbstractMetaEnum for a given AbstractMetaType that holds an EnumTypeEntry, or nullptr if not found.
-    std::optional<AbstractMetaEnum> findAbstractMetaEnum(const AbstractMetaType &metaType) const;
 
     virtual GeneratorContext contextForClass(const AbstractMetaClass *c) const;
     GeneratorContext contextForSmartPointer(const AbstractMetaClass *c,
@@ -340,12 +315,16 @@ protected:
      *   It will check first for a user defined default constructor.
      *   Returns a null string if it fails.
      */
-    std::optional<DefaultValue> minimalConstructor(const TypeEntry *type,
-                                                   QString *errorString = nullptr) const;
-    std::optional<DefaultValue> minimalConstructor(const AbstractMetaType &type,
-                                                   QString *errorString = nullptr) const;
-    std::optional<DefaultValue> minimalConstructor(const AbstractMetaClass *metaClass,
-                                                   QString *errorString = nullptr) const;
+    static std::optional<DefaultValue>
+        minimalConstructor(const ApiExtractorResult &api, const TypeEntry *type,
+                           QString *errorString = nullptr);
+    static std::optional<DefaultValue>
+        minimalConstructor(const ApiExtractorResult &api, const AbstractMetaType &type,
+                           QString *errorString = nullptr);
+    static std::optional<DefaultValue>
+        minimalConstructor(const ApiExtractorResult &api,
+                           const AbstractMetaClass *metaClass,
+                           QString *errorString = nullptr);
 
     /**
      *   Returns the file name used to write the binding code of an AbstractMetaClass/Type.

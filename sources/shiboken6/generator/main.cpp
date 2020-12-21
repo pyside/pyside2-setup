@@ -32,6 +32,7 @@
 #include <QtCore/QDir>
 #include <iostream>
 #include <apiextractor.h>
+#include <apiextractorresult.h>
 #include <fileout.h>
 #include <reporthandler.h>
 #include <typedatabase.h>
@@ -615,12 +616,14 @@ int main(int argc, char *argv[])
     auto shibokenGenerator = dynamic_cast<const ShibokenGenerator *>(generators.constFirst().data());
     const bool usePySideExtensions = shibokenGenerator && shibokenGenerator->usePySideExtensions();
 
-    if (!extractor.run(usePySideExtensions)) {
+    const std::optional<ApiExtractorResult> apiOpt = extractor.run(usePySideExtensions);
+
+    if (!apiOpt.has_value()) {
         errorPrint(QLatin1String("Error running ApiExtractor."));
         return EXIT_FAILURE;
     }
 
-    if (!extractor.classCount())
+    if (apiOpt->classes().isEmpty())
         qCWarning(lcShiboken) << "No C++ classes found!";
 
     if (ReportHandler::isDebug(ReportHandler::FullDebug)
@@ -633,7 +636,7 @@ int main(int argc, char *argv[])
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
         ReportHandler::startProgress(QByteArray("Running ") + g->name() + "...");
-        const bool ok = g->setup(extractor) && g->generate();
+        const bool ok = g->setup(apiOpt.value()) && g->generate();
         ReportHandler::endProgress();
          if (!ok) {
              errorPrint(QLatin1String("Error running generator: ")

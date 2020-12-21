@@ -176,7 +176,8 @@ protected:
                               const QString &outArgName) const;
 
     /// Returns true if the argument is a pointer that rejects nullptr values.
-    bool shouldRejectNullPointerArgument(const AbstractMetaFunctionCPtr &func, int argIndex) const;
+    static bool shouldRejectNullPointerArgument(const ApiExtractorResult &api,
+                                                const AbstractMetaFunctionCPtr &func, int argIndex);
 
     /// Verifies if the class should have a C++ wrapper generated for it, instead of only a Python wrapper.
     bool shouldGenerateCppWrapper(const AbstractMetaClass *metaClass) const;
@@ -213,13 +214,15 @@ protected:
     static bool isPyInt(const TypeEntry *type);
     static bool isPyInt(const AbstractMetaType &type);
 
-    bool isValueTypeWithCopyConstructorOnly(const TypeEntry *type) const;
-    bool isValueTypeWithCopyConstructorOnly(const AbstractMetaType &type) const;
+    static bool isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
+                                                   const TypeEntry *type);
+    static bool isValueTypeWithCopyConstructorOnly(const ApiExtractorResult &api,
+                                                   const AbstractMetaType &type);
 
     static bool isNullPtr(const QString &value);
 
     QString converterObject(const AbstractMetaType &type) const;
-    QString converterObject(const TypeEntry *type) const;
+    static QString converterObject(const TypeEntry *type);
 
     static QString cpythonBaseName(const AbstractMetaClass *metaClass);
     static QString cpythonBaseName(const TypeEntry *type);
@@ -246,8 +249,10 @@ protected:
         std::optional<AbstractMetaType> type;
     };
     CPythonCheckFunctionResult guessCPythonCheckFunction(const QString &type) const;
-    QString cpythonIsConvertibleFunction(const TypeEntry *type, bool genericNumberType = false,
-                                                bool checkExact = false) const;
+    static QString cpythonIsConvertibleFunction(const ApiExtractorResult &api,
+                                                const TypeEntry *type,
+                                                bool genericNumberType = false,
+                                                bool checkExact = false);
     QString cpythonIsConvertibleFunction(AbstractMetaType metaType,
                                          bool genericNumberType = false) const;
     QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg,
@@ -341,10 +346,12 @@ protected:
     /// Creates an AbstractMetaType object from an AbstractMetaClass.
     AbstractMetaType buildAbstractMetaTypeFromAbstractMetaClass(const AbstractMetaClass *metaClass) const;
 
-    void writeMinimalConstructorExpression(TextStream &s, const AbstractMetaType &type,
-                                           const QString &defaultCtor = QString()) const;
-    void writeMinimalConstructorExpression(TextStream &s, const TypeEntry *type,
-                                           const QString &defaultCtor = QString()) const;
+    static void writeMinimalConstructorExpression(TextStream &s, const ApiExtractorResult &api,
+                                                  const AbstractMetaType &type,
+                                                  const QString &defaultCtor = QString());
+    static void writeMinimalConstructorExpression(TextStream &s, const ApiExtractorResult &api,
+                                                  const TypeEntry *type,
+                                                  const QString &defaultCtor = QString());
 
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
 

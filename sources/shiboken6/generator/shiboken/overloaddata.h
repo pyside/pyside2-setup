@@ -29,13 +29,12 @@
 #ifndef OVERLOADDATA_H
 #define OVERLOADDATA_H
 
-#include <abstractmetalang_typedefs.h>
+#include <apiextractorresult.h>
+
 #include <QtCore/QBitArray>
 #include <QtCore/QList>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
-
-class ShibokenGenerator;
 
 class OverloadData;
 using OverloadDataList = QList<OverloadData *>;
@@ -43,7 +42,8 @@ using OverloadDataList = QList<OverloadData *>;
 class OverloadData
 {
 public:
-    OverloadData(const AbstractMetaFunctionCList &overloads, const ShibokenGenerator *generator);
+    OverloadData(const AbstractMetaFunctionCList &overloads,
+                 const ApiExtractorResult &api);
     ~OverloadData();
 
     int minArgs() const { return m_headOverloadData->m_minArgs; }
@@ -129,7 +129,8 @@ public:
 
 private:
     OverloadData(OverloadData *headOverloadData, const AbstractMetaFunctionCPtr &func,
-                 const AbstractMetaType &argType, int argPos);
+                 const AbstractMetaType &argType, int argPos,
+                 const ApiExtractorResult &api);
 
     void addOverload(const AbstractMetaFunctionCPtr &func);
     OverloadData *addOverloadData(const AbstractMetaFunctionCPtr &func, const AbstractMetaArgument &arg);
@@ -150,7 +151,7 @@ private:
     OverloadData *m_headOverloadData;
     OverloadDataList m_nextOverloadData;
     OverloadData *m_previousOverloadData;
-    const ShibokenGenerator *m_generator;
+    const ApiExtractorResult m_api;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

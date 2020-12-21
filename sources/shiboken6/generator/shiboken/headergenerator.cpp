@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "headergenerator.h"
+#include <apiextractorresult.h>
 #include <abstractmetaenum.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
@@ -314,7 +315,8 @@ static inline void _writeTypeIndexValueLine(TextStream &s,
     s << ",\n";
 }
 
-void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const TypeEntry *typeEntry) const
+void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
+                                              const TypeEntry *typeEntry)
 {
     if (!typeEntry || !typeEntry->generateCode())
         return;
@@ -324,7 +326,8 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const TypeEntry *ty
     if (typeEntry->isComplex()) {
         const auto *cType = static_cast<const ComplexTypeEntry *>(typeEntry);
         if (cType->baseContainerType()) {
-            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(classes(), cType);
+            auto metaClass = AbstractMetaClass::findClass(api.classes(), cType);
+            Q_ASSERT(metaClass != nullptr);
             if (metaClass->templateBaseClass())
                 _writeTypeIndexValueLine(s, getTypeIndexVariableName(metaClass, true), typeIndex);
         }
@@ -332,11 +335,12 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const TypeEntry *ty
     if (typeEntry->isEnum()) {
         auto ete = static_cast<const EnumTypeEntry *>(typeEntry);
         if (ete->flags())
-            writeTypeIndexValueLine(s, ete->flags());
+            writeTypeIndexValueLine(s, api, ete->flags());
     }
 }
 
-void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const AbstractMetaClass *metaClass) const
+void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
+                                               const AbstractMetaClass *metaClass)
 {
     auto typeEntry = metaClass->typeEntry();
     if (!typeEntry->generateCode())
@@ -344,10 +348,10 @@ void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const AbstractMeta
     // enum indices are required for invisible namespaces as well.
     for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
         if (!metaEnum.isPrivate())
-            writeTypeIndexValueLine(s, metaEnum.typeEntry());
+            writeTypeIndexValueLine(s, api, metaEnum.typeEntry());
     }
     if (NamespaceTypeEntry::isVisibleScope(typeEntry))
-        writeTypeIndexValueLine(s, metaClass->typeEntry());
+        writeTypeIndexValueLine(s, api, metaClass->typeEntry());
 }
 
 // Format the typedefs for the typedef entries to be generated
@@ -392,17 +396,17 @@ bool HeaderGenerator::finishGeneration()
     }
 
     macrosStream << "// Type indices\nenum : int {\n";
-    AbstractMetaClassList classList = classes();
+    AbstractMetaClassList classList = api().classes();
 
     std::sort(classList.begin(), classList.end(), [](AbstractMetaClass *a, AbstractMetaClass *b) {
         return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
     });
 
     for (const AbstractMetaClass *metaClass : classList)
-        writeTypeIndexValueLines(macrosStream, metaClass);
+        writeTypeIndexValueLines(macrosStream, api(), metaClass);
 
-    for (const AbstractMetaEnum &metaEnum : globalEnums())
-        writeTypeIndexValueLine(macrosStream, metaEnum.typeEntry());
+    for (const AbstractMetaEnum &metaEnum : api().globalEnums())
+        writeTypeIndexValueLine(macrosStream, api(), metaEnum.typeEntry());
 
     // Write the smart pointer define indexes.
     int smartPointerCountIndex = getMaxTypeIndex();
@@ -477,7 +481,7 @@ bool HeaderGenerator::finishGeneration()
         typeFunctions << "QT_WARNING_PUSH\n";
         typeFunctions << "QT_WARNING_DISABLE_DEPRECATED\n";
     }
-    for (const AbstractMetaEnum &cppEnum : globalEnums()) {
+    for (const AbstractMetaEnum &cppEnum : api().globalEnums()) {
         if (!cppEnum.isAnonymous()) {
             includes << cppEnum.typeEntry()->include();
             writeSbkTypeFunction(typeFunctions, cppEnum);

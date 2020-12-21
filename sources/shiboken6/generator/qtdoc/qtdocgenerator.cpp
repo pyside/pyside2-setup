@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "qtdocgenerator.h"
+#include "apiextractorresult.h"
 #include "qtxmltosphinx.h"
 #include "rstformat.h"
 #include "ctypenames.h"
@@ -283,7 +284,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     // TODO: This would be a parameter in the future...
 
 
-    writeInheritedByList(s, metaClass, classes());
+    writeInheritedByList(s, metaClass, api().classes());
 
     const auto version = versionOf(metaClass->typeEntry());
     if (!version.isNull())
@@ -698,7 +699,7 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
                                          .arg(types[0], types[1]);
         }
     } else {
-        const AbstractMetaClass *k = AbstractMetaClass::findClass(classes(), type.typeEntry());
+        auto k = AbstractMetaClass::findClass(api().classes(), type.typeEntry());
         strType = k ? k->fullName() : type.name();
         strType = QStringLiteral(":any:`") + strType + QLatin1Char('`');
     }
@@ -834,7 +835,7 @@ static void writeFancyToc(TextStream& s, const QStringList& items, int cols = 2)
 
 bool QtDocGenerator::finishGeneration()
 {
-    if (!classes().isEmpty())
+    if (!api().classes().isEmpty())
         writeModuleDocumentation();
     if (!m_additionalDocumentationList.isEmpty())
         writeAdditionalDocumentation();
@@ -1098,7 +1099,7 @@ QString QtDocGenerator::expandFunction(const QString &function) const
     const AbstractMetaClass *metaClass = nullptr;
     if (firstDot != -1) {
         const auto className = QStringView{function}.left(firstDot);
-        for (const AbstractMetaClass *cls : classes()) {
+        for (auto cls : api().classes()) {
             if (cls->name() == className) {
                 metaClass = cls;
                 break;
@@ -1135,7 +1136,7 @@ QString QtDocGenerator::resolveContextForMethod(const QString &context,
     const auto currentClass = QStringView{context}.split(QLatin1Char('.')).constLast();
 
     const AbstractMetaClass *metaClass = nullptr;
-    for (const AbstractMetaClass *cls : classes()) {
+    for (auto cls : api().classes()) {
         if (cls->name() == currentClass) {
             metaClass = cls;
             break;

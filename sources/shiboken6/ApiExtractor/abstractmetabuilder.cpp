@@ -112,15 +112,9 @@ const AbstractMetaEnumList &AbstractMetaBuilder::globalEnums() const
     return d->m_globalEnums;
 }
 
-std::optional<AbstractMetaEnum>
-    AbstractMetaBuilder::findEnum(const TypeEntry *typeEntry) const
+const QHash<const TypeEntry *, AbstractMetaEnum> &AbstractMetaBuilder::typeEntryToEnumsHash() const
 {
-    if (typeEntry && typeEntry->isFlags())
-        typeEntry = static_cast<const FlagsTypeEntry *>(typeEntry)->originator();
-    const auto it = d->m_enums.constFind(typeEntry);
-    if (it == d->m_enums.constEnd())
-        return {};
-    return it.value();
+    return d->m_enums;
 }
 
 void AbstractMetaBuilderPrivate::checkFunctionModifications()
