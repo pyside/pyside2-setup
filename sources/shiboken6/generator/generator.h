@@ -217,7 +217,7 @@ public:
     virtual bool handleOption(const QString &key, const QString &value);
 
     /// Returns the top namespace made invisible
-    const AbstractMetaClassList &invisibleTopNamespaces() const;
+    const AbstractMetaClassCList &invisibleTopNamespaces() const;
 
     /// Returns the output directory
     QString outputDirectory() const;

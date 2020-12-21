@@ -49,8 +49,8 @@ class ApiExtractorResult
 public:
     const AbstractMetaEnumList &globalEnums() const { return m_globalEnums; }
     const AbstractMetaFunctionCList &globalFunctions() const { return m_globalFunctions; }
-    const AbstractMetaClassList &classes() const { return m_metaClasses; }
-    const AbstractMetaClassList &smartPointers() const { return m_smartPointers; }
+    const AbstractMetaClassCList &classes() const { return m_metaClasses; }
+    const AbstractMetaClassCList &smartPointers() const { return m_smartPointers; }
 
     // Query functions for the generators
     std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry* typeEntry) const;
@@ -64,8 +64,8 @@ public:
     AbstractMetaFunctionCList implicitConversions(const AbstractMetaType &metaType) const;
 
 private:
-    AbstractMetaClassList m_metaClasses;
-    AbstractMetaClassList m_smartPointers;
+    AbstractMetaClassCList m_metaClasses;
+    AbstractMetaClassCList m_smartPointers;
     AbstractMetaFunctionCList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 

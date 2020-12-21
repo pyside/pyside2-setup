@@ -215,10 +215,11 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const Documentation &doc,
     s << '\n';
 }
 
-static void writeInheritedByList(TextStream& s, const AbstractMetaClass* metaClass, const AbstractMetaClassList& allClasses)
+static void writeInheritedByList(TextStream& s, const AbstractMetaClass* metaClass,
+                                 const AbstractMetaClassCList& allClasses)
 {
-    AbstractMetaClassList res;
-    for (AbstractMetaClass *c : allClasses) {
+    AbstractMetaClassCList res;
+    for (auto c : allClasses) {
         if (c != metaClass && c->inheritsFrom(metaClass))
             res << c;
     }
@@ -228,7 +229,7 @@ static void writeInheritedByList(TextStream& s, const AbstractMetaClass* metaCla
 
     s << "**Inherited by:** ";
     QStringList classes;
-    for (AbstractMetaClass *c : qAsConst(res))
+    for (auto c : qAsConst(res))
         classes << QLatin1String(":ref:`") + c->name() + QLatin1Char('`');
     s << classes.join(QLatin1String(", ")) << "\n\n";
 }

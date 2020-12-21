@@ -5749,7 +5749,7 @@ QString CppGenerator::qObjectGetAttroFunction() const
 {
     static QString result;
     if (result.isEmpty()) {
-        AbstractMetaClass *qobjectClass = AbstractMetaClass::findClass(api().classes(), qObjectT());
+        auto qobjectClass = AbstractMetaClass::findClass(api().classes(), qObjectT());
         Q_ASSERT(qobjectClass);
         result = QLatin1String("PySide::getMetaDataFromQObject(")
                  + cpythonWrapperCPtr(qobjectClass, QLatin1String("self"))

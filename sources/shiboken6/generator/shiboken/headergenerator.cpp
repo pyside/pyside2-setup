@@ -396,9 +396,9 @@ bool HeaderGenerator::finishGeneration()
     }
 
     macrosStream << "// Type indices\nenum : int {\n";
-    AbstractMetaClassList classList = api().classes();
+    AbstractMetaClassCList classList = api().classes();
 
-    std::sort(classList.begin(), classList.end(), [](AbstractMetaClass *a, AbstractMetaClass *b) {
+    std::sort(classList.begin(), classList.end(), [](const AbstractMetaClass *a, const AbstractMetaClass *b) {
         return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
     });
 
@@ -489,7 +489,7 @@ bool HeaderGenerator::finishGeneration()
     }
 
     StringStream protEnumsSurrogates(TextStream::Language::Cpp);
-    for (AbstractMetaClass *metaClass : classList) {
+    for (auto metaClass : classList) {
         if (!shouldGenerate(metaClass))
             continue;
 

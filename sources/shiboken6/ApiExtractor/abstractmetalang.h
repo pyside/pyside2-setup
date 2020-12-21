@@ -293,8 +293,12 @@ public:
 
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const QString &name);
+    static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
+                                              const QString &name);
     static AbstractMetaClass *findClass(const AbstractMetaClassList &classes,
                                         const TypeEntry* typeEntry);
+    static const AbstractMetaClass *findClass(const AbstractMetaClassCList &classes,
+                                              const TypeEntry* typeEntry);
     static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,
                                                               const QString &string);
     static  std::optional<AbstractMetaEnum> findEnum(const AbstractMetaClassList &classes,

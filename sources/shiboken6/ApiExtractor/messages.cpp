@@ -576,7 +576,7 @@ QString msgConversionTypesDiffer(const QString &varType, const QString &conversi
 }
 
 QString msgCannotFindSmartPointer(const QString &instantiationType,
-                                  const AbstractMetaClassList &pointers)
+                                  const AbstractMetaClassCList &pointers)
 {
     QString result;
     QTextStream str(&result);

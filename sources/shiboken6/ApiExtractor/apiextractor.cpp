@@ -45,6 +45,9 @@
 #include "typedatabase.h"
 #include "typesystem.h"
 
+#include <algorithm>
+#include <iterator>
+
 ApiExtractor::ApiExtractor()
 {
     // Environment TYPESYSTEMPATH
@@ -222,13 +225,19 @@ bool ApiExtractor::runHelper(bool usePySideExtensions)
     return result;
 }
 
+static inline void classListToCList(const AbstractMetaClassList &list, AbstractMetaClassCList *target)
+{
+    target->reserve(list.size());
+    std::copy(list.cbegin(), list.cend(), std::back_inserter(*target));
+}
+
 std::optional<ApiExtractorResult> ApiExtractor::run(bool usePySideExtensions)
 {
     if (!runHelper(usePySideExtensions))
         return {};
     ApiExtractorResult result;
-    result.m_metaClasses = m_builder->classes();
-    result.m_smartPointers = m_builder->smartPointers();
+    classListToCList(m_builder->classes(), &result.m_metaClasses);
+    classListToCList(m_builder->smartPointers(), &result.m_smartPointers);
     result.m_globalFunctions = m_builder->globalFunctions();
     result.m_globalEnums = m_builder->globalEnums();
     result.m_enums = m_builder->typeEntryToEnumsHash();

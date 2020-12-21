@@ -177,7 +177,7 @@ struct Generator::GeneratorPrivate
     QStringList instantiatedContainersNames;
     AbstractMetaTypeList instantiatedContainers;
     AbstractMetaTypeList instantiatedSmartPointers;
-    AbstractMetaClassList m_invisibleTopNamespaces;
+    AbstractMetaClassCList m_invisibleTopNamespaces;
 };
 
 Generator::Generator() : m_d(new GeneratorPrivate)
@@ -353,7 +353,7 @@ bool Generator::handleOption(const QString & /* key */, const QString & /* value
     return false;
 }
 
-const AbstractMetaClassList &Generator::invisibleTopNamespaces() const
+const AbstractMetaClassCList &Generator::invisibleTopNamespaces() const
 {
     return m_d->m_invisibleTopNamespaces;
 }
@@ -460,7 +460,7 @@ bool Generator::generate()
 
     const auto smartPointers = m_d->api.smartPointers();
     for (const AbstractMetaType &type : qAsConst(m_d->instantiatedSmartPointers)) {
-        AbstractMetaClass *smartPointerClass =
+        const AbstractMetaClass *smartPointerClass =
             AbstractMetaClass::findClass(smartPointers, type.typeEntry());
         if (!smartPointerClass) {
             qCWarning(lcShiboken, "%s",

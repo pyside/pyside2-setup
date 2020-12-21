@@ -1409,10 +1409,27 @@ AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &cla
     return it != classes.cend() ? *it : nullptr;
 }
 
+const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
+                                                      const QString &name)
+{
+    auto it = findClassHelper(classes.cbegin(), classes.cend(), name);
+    return it != classes.cend() ? *it : nullptr;
+}
+
 AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
                                                 const TypeEntry *typeEntry)
 {
     for (AbstractMetaClass *c : classes) {
+        if (c->typeEntry() == typeEntry)
+            return c;
+    }
+    return nullptr;
+}
+
+const AbstractMetaClass *AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
+                                                      const TypeEntry *typeEntry)
+{
+    for (auto c : classes) {
         if (c->typeEntry() == typeEntry)
             return c;
     }
