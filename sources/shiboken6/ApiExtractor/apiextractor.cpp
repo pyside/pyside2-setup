@@ -146,16 +146,6 @@ const AbstractMetaClassList &ApiExtractor::smartPointers() const
     return m_builder->smartPointers();
 }
 
-PrimitiveTypeEntryList ApiExtractor::primitiveTypes() const
-{
-    return TypeDatabase::instance()->primitiveTypes();
-}
-
-ContainerTypeEntryList ApiExtractor::containerTypes() const
-{
-    return TypeDatabase::instance()->containerTypes();
-}
-
 std::optional<AbstractMetaEnum>
     ApiExtractor::findAbstractMetaEnum(const TypeEntry* typeEntry) const
 {

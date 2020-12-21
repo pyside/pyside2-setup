@@ -276,10 +276,10 @@ protected:
     const AbstractMetaEnumList &globalEnums() const;
 
     /// Returns all primitive types found by APIExtractor
-    PrimitiveTypeEntryList primitiveTypes() const;
+    static PrimitiveTypeEntryList primitiveTypes();
 
     /// Returns all container types found by APIExtractor
-    ContainerTypeEntryList containerTypes() const;
+    static ContainerTypeEntryList containerTypes();
 
     /// Returns an AbstractMetaEnum for a given TypeEntry that is an EnumTypeEntry, or nullptr if not found.
     std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry *typeEntry) const;

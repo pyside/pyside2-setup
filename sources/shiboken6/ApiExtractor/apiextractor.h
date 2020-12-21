@@ -85,8 +85,6 @@ public:
     const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaClassList &classes() const;
     const AbstractMetaClassList &smartPointers() const;
-    PrimitiveTypeEntryList primitiveTypes() const;
-    ContainerTypeEntryList containerTypes() const;
 
     std::optional<AbstractMetaEnum> findAbstractMetaEnum(const TypeEntry* typeEntry) const;
 

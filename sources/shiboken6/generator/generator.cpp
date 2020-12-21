@@ -372,14 +372,14 @@ const AbstractMetaEnumList &Generator::globalEnums() const
     return m_d->apiextractor->globalEnums();
 }
 
-PrimitiveTypeEntryList Generator::primitiveTypes() const
+PrimitiveTypeEntryList Generator::primitiveTypes()
 {
-    return m_d->apiextractor->primitiveTypes();
+    return TypeDatabase::instance()->primitiveTypes();
 }
 
-ContainerTypeEntryList Generator::containerTypes() const
+ContainerTypeEntryList Generator::containerTypes()
 {
-    return m_d->apiextractor->containerTypes();
+    return TypeDatabase::instance()->containerTypes();
 }
 
 std::optional<AbstractMetaEnum>
