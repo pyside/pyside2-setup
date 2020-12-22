@@ -175,16 +175,14 @@ public:
 
     virtual QString qualifiedCppName() const;
 
-    /**
-     *   Its type's name in target language API
-     *   The target language API name represents how this type is
-     *   referred on low level code for the target language.
-     *   Examples: for Java this would be a JNI name, for Python
-     *   it should represent the CPython type name.
-     *   /return string representing the target language API name
-     *   for this type entry
-     */
-    virtual QString targetLangApiName() const;
+    /// Its type's name in target language API.
+    /// The target language API name represents how this type is referred on
+    /// low level code for the target language. Examples: for Java this would
+    /// be a JNI name, for Python it should represent the CPython type name.
+    /// \return string representing the target language API name
+    /// Currently used only for PrimitiveTypeEntry (attribute "target").
+    QString targetLangApiName() const;
+    void setTargetLangApiName(const QString &t);
 
     // The type's name in TargetLang
     QString targetLangName() const; // "Foo.Bar"
@@ -349,8 +347,6 @@ public:
     void setNestedTypeEntry(TypeEntry *nested);
     const TypeEntry *nestedTypeEntry() const;
 
-    QString targetLangApiName() const override;
-
     TypeEntry *clone() const override;
 
 protected:
@@ -364,9 +360,6 @@ class PrimitiveTypeEntry : public TypeEntry
 public:
     explicit PrimitiveTypeEntry(const QString &entryName, const QVersionNumber &vr,
                                 const TypeEntry *parent);
-
-    QString targetLangApiName() const override;
-    void setTargetLangApiName(const QString &targetLangApiName);
 
     QString defaultConstructor() const;
     void setDefaultConstructor(const QString& defaultConstructor);
@@ -412,8 +405,6 @@ public:
 
     QString targetLangQualifier() const;
 
-    QString targetLangApiName() const override;
-
     QString qualifier() const;
 
     const EnumValueTypeEntry *nullValue() const;
@@ -458,8 +449,6 @@ class FlagsTypeEntry : public TypeEntry
 public:
     explicit FlagsTypeEntry(const QString &entryName, const QVersionNumber &vr,
                             const TypeEntry *parent);
-
-    QString targetLangApiName() const override;
 
     QString originalName() const;
     void setOriginalName(const QString &s);
@@ -511,8 +500,6 @@ public:
                               const TypeEntry *parent);
 
     bool isComplex() const override;
-
-    QString targetLangApiName() const override;
 
     TypeFlags typeFlags() const;
     void setTypeFlags(TypeFlags flags);

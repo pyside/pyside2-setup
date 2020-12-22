@@ -71,6 +71,7 @@ public:
 
     const TypeEntry *m_parent;
     QString m_name; // C++ fully qualified
+    QString m_targetLangApiName;
     mutable QString m_cachedShortName; // C++ excluding inline namespaces
     QString m_entryName;
     QString m_targetLangPackage;
@@ -430,7 +431,13 @@ QString TypeEntry::qualifiedCppName() const
 
 QString TypeEntry::targetLangApiName() const
 {
-    return m_d->m_name;
+    return m_d->m_targetLangApiName.isEmpty()
+        ? m_d->m_name : m_d->m_targetLangApiName;
+}
+
+void TypeEntry::setTargetLangApiName(const QString &t)
+{
+    m_d->m_targetLangApiName = t;
 }
 
 QString TypeEntry::targetLangName() const
@@ -778,14 +785,6 @@ QString ArrayTypeEntry::buildTargetLangName() const
     return d->m_nestedType->targetLangName() + QLatin1String("[]");
 }
 
-QString ArrayTypeEntry::targetLangApiName() const
-{
-    S_D(const ArrayTypeEntry);
-    return d->m_nestedType->isPrimitive()
-        ? d->m_nestedType->targetLangApiName() + QLatin1String("Array")
-        : QLatin1String("jobjectArray");
-}
-
 TypeEntry *ArrayTypeEntry::clone() const
 {
     S_D(const ArrayTypeEntry);
@@ -808,7 +807,6 @@ public:
     {
     }
 
-    QString m_targetLangApiName;
     QString m_defaultConstructor;
     uint m_preferredTargetLangType : 1;
     PrimitiveTypeEntry* m_referencedTypeEntry = nullptr;
@@ -818,18 +816,6 @@ PrimitiveTypeEntry::PrimitiveTypeEntry(const QString &entryName, const QVersionN
                                        const TypeEntry *parent) :
     TypeEntry(new PrimitiveTypeEntryPrivate(entryName, vr, parent))
 {
-}
-
-QString PrimitiveTypeEntry::targetLangApiName() const
-{
-    S_D(const PrimitiveTypeEntry);
-    return d->m_targetLangApiName;
-}
-
-void PrimitiveTypeEntry::setTargetLangApiName(const QString &targetLangApiName)
-{
-    S_D(PrimitiveTypeEntry);
-    d->m_targetLangApiName = targetLangApiName;
 }
 
 QString PrimitiveTypeEntry::defaultConstructor() const
@@ -972,11 +958,6 @@ QStringList EnumTypeEntry::enumValueRejections() const
     return d->m_rejectedEnums;
 }
 
-QString EnumTypeEntry::targetLangApiName() const
-{
-    return QLatin1String("jint");
-}
-
 TypeEntry *EnumTypeEntry::clone() const
 {
     S_D(const EnumTypeEntry);
@@ -1066,11 +1047,6 @@ QString FlagsTypeEntry::buildTargetLangName() const
 FlagsTypeEntry::FlagsTypeEntry(FlagsTypeEntryPrivate *d) :
     TypeEntry(d)
 {
-}
-
-QString FlagsTypeEntry::targetLangApiName() const
-{
-    return QLatin1String("jint");
 }
 
 QString FlagsTypeEntry::originalName() const
@@ -1177,11 +1153,6 @@ ComplexTypeEntry::ComplexTypeEntry(const QString &entryName, TypeEntry::Type t,
 bool ComplexTypeEntry::isComplex() const
 {
     return true;
-}
-
-QString ComplexTypeEntry::targetLangApiName() const
-{
-    return QStringLiteral("jobject");
 }
 
 void ComplexTypeEntry::setTypeFlags(TypeFlags flags)
