@@ -748,7 +748,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry *type)
                 //break;
             case ContainerTypeEntry::PairContainer:
                 //baseName = "PyTuple";
-                baseName = QLatin1String("PySequence");
+                baseName = cPySequenceT();
                 break;
             case ContainerTypeEntry::SetContainer:
                 baseName = QLatin1String("PySet");
@@ -763,7 +763,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntry *type)
                 Q_ASSERT(false);
         }
     } else {
-        baseName = QLatin1String("PyObject");
+        baseName = cPyObjectT();
     }
     return baseName.replace(QLatin1String("::"), QLatin1String("_"));
 }
@@ -1128,16 +1128,16 @@ ShibokenGenerator::CPythonCheckFunctionResult
 {
     // PYSIDE-795: We abuse PySequence for iterables.
     // This part handles the overrides in the XML files.
-    if (type == QLatin1String("PySequence"))
+    if (type == cPySequenceT())
         return {QLatin1String("Shiboken::String::checkIterable"), {}};
 
-    if (type == QLatin1String("PyTypeObject"))
+    if (type == cPyTypeObjectT())
         return {QLatin1String("PyType_Check"), {}};
 
-    if (type == QLatin1String("PyBuffer"))
+    if (type == cPyBufferT())
         return {QLatin1String("Shiboken::Buffer::checkType"), {}};
 
-    if (type == QLatin1String("str"))
+    if (type == pyStrT())
         return {QLatin1String("Shiboken::String::check"), {}};
 
     CPythonCheckFunctionResult result;
@@ -1995,7 +1995,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
             case TypeSystemCheckFunction:
                 conversion = cpythonCheckFunction(conversionType);
                 if (conversionType.typeEntry()->isPrimitive()
-                    && (conversionType.typeEntry()->name() == QLatin1String("PyObject")
+                    && (conversionType.typeEntry()->name() == cPyObjectT()
                         || !conversion.endsWith(QLatin1Char(' ')))) {
                     conversion += u'(';
                     break;

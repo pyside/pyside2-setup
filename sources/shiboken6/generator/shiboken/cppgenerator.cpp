@@ -1129,7 +1129,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (invalidateReturn)
                 s << "bool invalidateArg0 = " << PYTHON_RETURN_VAR << "->ob_refcnt == 1;\n";
 
-            if (func->typeReplaced(0) != QLatin1String("PyObject")) {
+            if (func->typeReplaced(0) != cPyObjectT()) {
 
                 s << "// Check return type\n";
                 if (func->typeReplaced(0).isEmpty()) {
@@ -2445,9 +2445,9 @@ static const QStringList &knownPythonTypes()
 {
     static const QStringList result = {
         pyBoolT(), pyIntT(), pyFloatT(), pyLongT(),
-        QLatin1String("PyObject"), QLatin1String("PyString"),
-        QLatin1String("PyBuffer"), QLatin1String("PySequence"),
-        QLatin1String("PyTuple"), QLatin1String("PyList"),
+        cPyObjectT(), QLatin1String("PyString"),
+        cPyBufferT(), cPySequenceT(),
+        QLatin1String("PyTuple"), cPyListT(),
         QLatin1String("PyDict"), QLatin1String("PyObject*"),
         QLatin1String("PyObject *"), QLatin1String("PyTupleObject*")};
     return result;
@@ -2786,7 +2786,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         int startArg = od->argPos();
         int sequenceArgCount = 0;
         while (od && !od->argType().isVarargs()) {
-            bool typeReplacedByPyObject = od->argumentTypeReplaced() == QLatin1String("PyObject");
+            bool typeReplacedByPyObject = od->argumentTypeReplaced() == cPyObjectT();
             if (!typeReplacedByPyObject) {
                 if (usePyArgs)
                     pyArgName = pythonArgsAt(od->argPos());
@@ -3149,12 +3149,12 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
             typeCheck = QLatin1String("Shiboken::isShibokenEnum(%in)");
         else if (pyTypeName == QLatin1String("SbkObject"))
             typeCheck = QLatin1String("Shiboken::Object::checkType(%in)");
-        else if (pyTypeName == QLatin1String("PyTypeObject"))
+        else if (pyTypeName == cPyTypeObjectT())
             typeCheck = QLatin1String("PyType_Check(%in)");
-        else if (pyTypeName == QLatin1String("PyObject"))
+        else if (pyTypeName == cPyObjectT())
             typeCheck = QLatin1String("PyObject_TypeCheck(%in, &PyBaseObject_Type)");
         // PYSIDE-795: We abuse PySequence for iterables
-        else if (pyTypeName == QLatin1String("PySequence"))
+        else if (pyTypeName == cPySequenceT())
             typeCheck = QLatin1String("Shiboken::String::checkIterable(%in)");
         else if (pyTypeName.startsWith(QLatin1String("Py")))
             typeCheck = pyTypeName + QLatin1String("_Check(%in)");
@@ -3911,7 +3911,7 @@ void CppGenerator::writePrimitiveConverterInitialization(TextStream &s, const Cu
         << converter << " = Shiboken::Conversions::createConverter(";
     if (type->targetLangApiName() == type->name())
         s << '0';
-    else if (type->targetLangApiName() == QLatin1String("PyObject"))
+    else if (type->targetLangApiName() == cPyObjectT())
         s << "&PyBaseObject_Type";
     else
         s << '&' << type->targetLangApiName() << "_Type";
@@ -4007,12 +4007,12 @@ void CppGenerator::writeContainerConverterInitialization(TextStream &s, const Ab
     s << "// Register converter for type '" << cppSignature << "'.\n";
     QString converter = converterObject(type);
     s << converter << " = Shiboken::Conversions::createConverter(";
-    if (type.typeEntry()->targetLangApiName() == QLatin1String("PyObject")) {
+    if (type.typeEntry()->targetLangApiName() == cPyObjectT()) {
         s << "&PyBaseObject_Type";
     } else {
         QString baseName = cpythonBaseName(type.typeEntry());
-        if (baseName == QLatin1String("PySequence"))
-            baseName = QLatin1String("PyList");
+        if (baseName == cPySequenceT())
+            baseName = cPyListT();
         s << '&' << baseName << "_Type";
     }
     QString typeName = fixedCppTypeName(type);

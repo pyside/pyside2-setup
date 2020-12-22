@@ -31,6 +31,7 @@
 #include "qtxmltosphinx.h"
 #include "rstformat.h"
 #include "ctypenames.h"
+#include "pytypenames.h"
 #include <abstractmetaenum.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
@@ -650,20 +651,19 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClass* cppClass,
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
                                               const AbstractMetaClass* cppClass) const
 {
-    static const QStringList nativeTypes = {boolT(), floatT(), intT(),
-        QLatin1String("object"),
-        QLatin1String("str")
-    };
+    static const QStringList nativeTypes =
+        {boolT(), floatT(), intT(), pyObjectT(), pyStrT()};
+
     const QString name = type.name();
     if (nativeTypes.contains(name))
         return name;
 
     static const QMap<QString, QString> typeMap = {
-        { QLatin1String("PyObject"), QLatin1String("object") },
-        { QLatin1String("QString"), QLatin1String("str") },
-        { QLatin1String("uchar"), QLatin1String("str") },
+        { cPyObjectT(), pyObjectT() },
+        { qStringT(), pyStrT() },
+        { QLatin1String("uchar"), pyStrT() },
         { QLatin1String("QStringList"), QLatin1String("list of strings") },
-        { qVariantT(), QLatin1String("object") },
+        { qVariantT(), pyObjectT() },
         { QLatin1String("quint32"), intT() },
         { QLatin1String("uint32_t"), intT() },
         { QLatin1String("quint64"), intT() },

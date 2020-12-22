@@ -34,6 +34,7 @@
 #include <graph.h>
 #include "overloaddata.h"
 #include "ctypenames.h"
+#include "pytypenames.h"
 #include "textstream.h"
 
 #include <QtCore/QDir>
@@ -161,10 +162,6 @@ bool OverloadData::sortByOverloadNumberModification()
     return true;
 }
 
-static inline QString pyObjectT() { return QStringLiteral("PyObject"); }
-static inline QString pySequenceT() { return QStringLiteral("PySequence"); }
-static inline QString pyBufferT() { return QStringLiteral("PyBuffer"); }
-
 using OverloadGraph = Graph<QString>;
 
 /**
@@ -216,11 +213,11 @@ void OverloadData::sortNextOverloads()
             it.value().append(ov);
         }
 
-        if (!checkPyObject && typeName == pyObjectT())
+        if (!checkPyObject && typeName == cPyObjectT())
             checkPyObject = true;
-        else if (!checkPySequence && typeName == pySequenceT())
+        else if (!checkPySequence && typeName == cPySequenceT())
             checkPySequence = true;
-        else if (!checkPyBuffer && typeName == pyBufferT())
+        else if (!checkPyBuffer && typeName == cPyBufferT())
             checkPyBuffer = true;
         else if (!checkQVariant && typeName == qVariantT())
             checkQVariant = true;
@@ -261,7 +258,7 @@ void OverloadData::sortNextOverloads()
     }
 
     if (checkPySequence && checkPyObject)
-        graph.addEdge(pySequenceT(), pyObjectT());
+        graph.addEdge(cPySequenceT(), cPyObjectT());
 
     QStringList classesWithIntegerImplicitConversion;
 
@@ -340,18 +337,18 @@ void OverloadData::sortNextOverloads()
 
 
         if ((checkPySequence || checkPyObject || checkPyBuffer)
-            && !targetTypeEntryName.contains(pyObjectT())
-            && !targetTypeEntryName.contains(pyBufferT())
-            && !targetTypeEntryName.contains(pySequenceT())) {
+            && !targetTypeEntryName.contains(cPyObjectT())
+            && !targetTypeEntryName.contains(cPyBufferT())
+            && !targetTypeEntryName.contains(cPySequenceT())) {
             if (checkPySequence) {
                 // PySequence will be checked after all more specific types, but before PyObject.
-                graph.addEdge(targetTypeEntryName, pySequenceT());
+                graph.addEdge(targetTypeEntryName, cPySequenceT());
             } else if (checkPyBuffer) {
                 // PySequence will be checked after all more specific types, but before PyObject.
-                graph.addEdge(targetTypeEntryName, pyBufferT());
+                graph.addEdge(targetTypeEntryName, cPyBufferT());
             } else {
                 // Add dependency on PyObject, so its check is the last one (too generic).
-                graph.addEdge(targetTypeEntryName, pyObjectT());
+                graph.addEdge(targetTypeEntryName, cPyObjectT());
             }
         } else if (checkQVariant && targetTypeEntryName != qVariantT()) {
             if (!graph.containsEdge(qVariantT(), targetTypeEntryName)) // Avoid cyclic dependency.
@@ -359,7 +356,7 @@ void OverloadData::sortNextOverloads()
         } else if (checkQString && ov->argType().isPointer()
             && targetTypeEntryName != qStringT()
             && targetTypeEntryName != qByteArrayT()
-            && (!checkPyObject || targetTypeEntryName != pyObjectT())) {
+            && (!checkPyObject || targetTypeEntryName != cPyObjectT())) {
             if (!graph.containsEdge(qStringT(), targetTypeEntryName)) // Avoid cyclic dependency.
                 graph.addEdge(targetTypeEntryName, qStringT());
         }

@@ -35,6 +35,14 @@ static inline QString pyBoolT() { return QStringLiteral("PyBool"); }
 static inline QString pyFloatT() { return QStringLiteral("PyFloat"); }
 static inline QString pyIntT() { return QStringLiteral("PyInt"); }
 static inline QString pyLongT() { return QStringLiteral("PyLong"); }
+static inline QString pyObjectT() { return QStringLiteral("object"); }
+static inline QString pyStrT() { return QStringLiteral("str"); }
+
+static inline QString cPyBufferT() { return QStringLiteral("PyBuffer"); }
+static inline QString cPyListT() { return QStringLiteral("PyList"); }
+static inline QString cPyObjectT() { return QStringLiteral("PyObject"); }
+static inline QString cPySequenceT() { return QStringLiteral("PySequence"); }
+static inline QString cPyTypeObjectT() { return QStringLiteral("PyTypeObject"); }
 
 static inline QString sbkCharT() { return QStringLiteral("SbkChar"); }
 

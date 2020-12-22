@@ -36,12 +36,6 @@
 #include <QtCore/QRegularExpression>
 #include <QtCore/QSet>
 
-static QString strings_Object = QLatin1String("Object");
-static QString strings_String = QLatin1String("String");
-static QString strings_char = QLatin1String("char");
-static QString strings_jchar = QLatin1String("jchar");
-static QString strings_jobject = QLatin1String("jobject");
-
 static QString buildName(const QString &entryName, const TypeEntry *parent)
 {
     return parent == nullptr || parent->type() == TypeEntry::TypeSystemType
@@ -1187,7 +1181,7 @@ bool ComplexTypeEntry::isComplex() const
 
 QString ComplexTypeEntry::targetLangApiName() const
 {
-    return strings_jobject;
+    return QStringLiteral("jobject");
 }
 
 void ComplexTypeEntry::setTypeFlags(TypeFlags flags)
