@@ -319,6 +319,11 @@ static int SbkObject_traverse(PyObject *self, visitproc visit, void *arg)
 
     if (sbkSelf->ob_dict)
         Py_VISIT(sbkSelf->ob_dict);
+
+#if PY_VERSION_HEX >= 0x03090000
+    // This was not needed before Python 3.9 (Python issue 35810 and 40217)
+    Py_VISIT(Py_TYPE(self));
+#endif
     return 0;
 }
 
@@ -769,12 +774,15 @@ PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *)
     // PYSIDE-560:
     // We avoid to use this in Python 3, because we have a hard time to get
     // write access to these flags
-#ifndef IS_PY3K
+
+    // PYSIDE-1447:
+    // Since Python 3.8, we have the same weird flags handling in Python 3.8
+    // as well. The singleton Python is no longer needed and we could remove
+    // the whole special handling, maybe in another checkin.
     if (PyType_HasFeature(subtype, Py_TPFLAGS_HAVE_GC)) {
         subtype->tp_flags &= ~Py_TPFLAGS_HAVE_GC;
         subtype->tp_free = PyObject_Del;
     }
-#endif
     auto self = reinterpret_cast<SbkObject *>(MakeQAppWrapper(subtype));
     return self == nullptr ? nullptr : _setupNew(self, subtype);
 }

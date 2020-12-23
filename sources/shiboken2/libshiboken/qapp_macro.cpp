@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
@@ -54,38 +54,36 @@ extern "C"
 // This variable is also able to destroy the app by qApp.shutdown().
 //
 
-static PyObject *qApp_var = nullptr;
-static PyObject *qApp_content = nullptr;
+static PyObject *qApp_name = nullptr;
+static PyObject *qApp_last = nullptr;
 
-static PyObject *
-monitor_qApp_var(PyObject *qApp)
+static PyObject *monitor_qApp_var(PyObject *qApp_curr)
 {
     static bool init_done;
     static PyObject *builtins = PyEval_GetBuiltins();
 
     if (!init_done) {
-        qApp_var = Py_BuildValue("s", "qApp");
-        if (qApp_var == nullptr)
+        qApp_name = Py_BuildValue("s", "qApp");
+        if (qApp_name == nullptr)
             return nullptr;
         // This is a borrowed reference
         Py_INCREF(builtins);
         init_done = true;
     }
 
-    if (PyDict_SetItem(builtins, qApp_var, qApp) < 0)
+    if (PyDict_SetItem(builtins, qApp_name, qApp_curr) < 0)
         return nullptr;
-    qApp_content = qApp;
-    Py_INCREF(qApp);
-    return qApp;
+    qApp_last = qApp_curr;
+    Py_INCREF(qApp_curr);
+    return qApp_curr;
 }
 
-PyObject *
-MakeQAppWrapper(PyTypeObject *type)
+PyObject *MakeQAppWrapper(PyTypeObject *type)
 {
     if (type == nullptr)
         type = Py_TYPE(Py_None);
-    if (!(type == Py_TYPE(Py_None) || Py_TYPE(qApp_content) == Py_TYPE(Py_None))) {
-        const char *res_name = PepType_GetNameStr(Py_TYPE(qApp_content));
+    if (!(type == Py_TYPE(Py_None) || Py_TYPE(qApp_last) == Py_TYPE(Py_None))) {
+        const char *res_name = PepType_GetNameStr(Py_TYPE(qApp_last));
         const char *type_name = PepType_GetNameStr(type);
         PyErr_Format(PyExc_RuntimeError, "Please destroy the %s singleton before"
             " creating a new %s instance.", res_name, type_name);
