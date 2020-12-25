@@ -108,8 +108,11 @@ def bootstrap():
     rp = os.path.realpath(os.path.dirname(root.__file__))
     # This can be the shiboken6 directory or the binary module, so search.
     look_for = os.path.join("files.dir", "shibokensupport", "signature", "loader.py")
-    while len(rp) > 3 and not os.path.exists(os.path.join(rp, look_for)):
-        rp = os.path.abspath(os.path.join(rp, ".."))
+    while not os.path.exists(os.path.join(rp, look_for)):
+        dir = os.path.dirname(rp)
+        if dir == rp:  # Hit root, '/', 'C:\', '\\server\share'
+            break
+        rp = dir
 
     # Here we decide if we work embedded or not.
     embedding_var = "pyside_uses_embedding"
