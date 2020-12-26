@@ -57,7 +57,6 @@ sbkstaticstrings.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 shibokenbuffer.cpp
-qapp_macro.cpp
 pep384impl.cpp
 voidptr.cpp
 bufferprocs_py37.cpp
@@ -139,7 +138,6 @@ install(FILES
         shibokenbuffer.h
         sbkpython.h
         pep384impl.h
-        qapp_macro.h
         voidptr.h
         bufferprocs_py37.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"

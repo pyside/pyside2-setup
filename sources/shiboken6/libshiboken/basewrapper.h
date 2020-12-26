@@ -118,8 +118,12 @@ struct LIBSHIBOKEN_API SbkObjectType
 };
 
 LIBSHIBOKEN_API PyObject *SbkObjectTpNew(PyTypeObject *subtype, PyObject *, PyObject *);
-// the special case of a switchable singleton
-LIBSHIBOKEN_API PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
+
+/// The special case of a switchable singleton Q*Application.
+LIBSHIBOKEN_API PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *);
+
+/// Create a new Q*Application wrapper and monitor it.
+LIBSHIBOKEN_API PyObject *MakeQAppWrapper(PyTypeObject *type);
 
 /**
  *  PYSIDE-832: Use object_dealloc instead of nullptr.

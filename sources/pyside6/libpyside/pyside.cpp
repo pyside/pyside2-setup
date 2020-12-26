@@ -58,7 +58,6 @@
 #include <sbkconverter.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
-#include <qapp_macro.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QCoreApplication>
