@@ -57,9 +57,9 @@ try:
 
     wheel_module_exists = True
 except Exception as e:
-    _bdist_wheel, wheel_version = type, ''  # dummy to make class statement happy
-    print('***** Exception while trying to prepare bdist_wheel override class: {}. '
-          'Skipping wheel overriding.'.format(e))
+    _bdist_wheel, wheel_version = type, ""  # dummy to make class statement happy
+    logger.warn(f"***** Exception while trying to prepare bdist_wheel override class: {e}. "
+          "Skipping wheel overriding.")
 
 
 def get_bdist_wheel_override():

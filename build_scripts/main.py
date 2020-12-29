@@ -246,8 +246,7 @@ def check_allowed_python_version():
             supported.append((major, minor))
     this_py = sys.version_info[:2]
     if this_py not in supported:
-        print("Unsupported python version detected. Only these python versions are supported: {}"
-              .format(supported))
+        log.error(f"Unsupported python version detected. Supported versions: {supported}")
         sys.exit(1)
 
 
@@ -321,8 +320,8 @@ def prepare_build():
             try:
                 rmtree(d)
             except Exception as e:
-                print('***** problem removing "{}"'.format(d))
-                print('ignored error: {}'.format(e))
+                log.warn(f'***** problem removing "{d}"')
+                log.warn(f'ignored error: {e}')
 
     # locate Qt sources for the documentation
     if OPTION["QT_SRC"] is None:
@@ -367,7 +366,7 @@ class PysideInstall(_install, DistUtilsCommandMixin):
 
     def run(self):
         _install.run(self)
-        print('--- Install completed ({}s)'.format(elapsed()))
+        log.info(f"--- Install completed ({elapsed()}s)")
 
 
 class PysideDevelop(_develop):
@@ -604,7 +603,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             _build.run(self)
         else:
             log.info("Skipped preparing and building packages.")
-        print('--- Build completed ({}s)'.format(elapsed()))
+        log.info(f"--- Build completed ({elapsed()}s)")
 
     def log_pre_build_info(self):
         if config.is_internal_shiboken_generator_build_and_part_of_top_level_all():

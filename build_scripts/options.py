@@ -308,10 +308,10 @@ class DistUtilsCommandMixin(object):
         if not self.cmake:
             self.cmake = find_executable("cmake")
         if not self.cmake:
-            print("cmake could not be found.")
+            log.error("cmake could not be found.")
             return False
         if not os.path.exists(self.cmake):
-            print("'{}' does not exist.".format(self.cmake))
+            log.error(f"'{self.cmake}' does not exist.")
             return False
 
         if not self.qmake:
@@ -319,21 +319,21 @@ class DistUtilsCommandMixin(object):
             if not self.qmake:
                 self.qmake = find_executable("qmake-qt5")
         if not self.qmake:
-            print("qmake could not be found.")
+            log.error("qmake could not be found.")
             return False
         if not os.path.exists(self.qmake):
-            print("'{}' does not exist.".format(self.qmake))
+            log.error(f"'{self.qmake}' does not exist.")
             return False
 
         if not self.make_spec:
             self.make_spec = _AVAILABLE_MKSPECS[0]
         if self.make_spec not in _AVAILABLE_MKSPECS:
-            print('Invalid option --make-spec "{}". Available values are {}'.format(self.make_spec,
-                                                                                    _AVAILABLE_MKSPECS))
+            log.error(f'Invalid option --make-spec "{self.make_spec}". '
+                      f'Available values are {_AVAILABLE_MKSPECS}')
             return False
 
         if OPTION["JOBS"] and sys.platform == 'win32' and self.no_jom:
-            print("Option --jobs can only be used with jom on Windows.")
+            log.error("Option --jobs can only be used with jom on Windows.")
             return False
 
         return True

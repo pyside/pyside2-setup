@@ -1075,28 +1075,28 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
     env_pip = _env + "/bin/pip"
 
     if host == "Windows":
-        print("New virtualenv to build {} in {} host".format(targetArch, hostArch))
+        log.info("New virtualenv to build {targetArch} in {hostArch} host")
         _pExe = "python.exe"
         # With windows we are creating building 32-bit target in 64-bit host
         if hostArch == "X86_64" and targetArch == "X86":
             if python_ver.startswith("3"):
-                var = "PYTHON" + python_ver + "-32_PATH"
-                print("Try to find python from {} env variable".format(var))
+                var = f"PYTHON{python_ver}-32_PATH"
+                log.info(f"Try to find python from {var} env variable")
                 _path = os.getenv(var, "")
                 _pExe = os.path.join(_path, "python.exe")
                 if not os.path.isfile(_pExe):
-                    print("Can't find python.exe from {}, using default python3".format(_pExe))
+                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
                     _pExe = os.path.join(os.getenv("PYTHON3_32_PATH"), "python.exe")
             else:
                 _pExe = os.path.join(os.getenv("PYTHON2_32_PATH"), "python.exe")
         else:
             if python_ver.startswith("3"):
-                var = "PYTHON" + python_ver + "-64_PATH"
-                print("Try to find python from {} env variable".format(var))
+                var = f"PYTHON{python_ver}-64_PATH"
+                log.info(f"Try to find python from {var} env variable")
                 _path = os.getenv(var, "")
                 _pExe = os.path.join(_path, "python.exe")
                 if not os.path.isfile(_pExe):
-                    print("Can't find python.exe from {}, using default python3".format(_pExe))
+                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
                     _pExe = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
         env_python = _env + "\\Scripts\\python.exe"
         env_pip = _env + "\\Scripts\\pip.exe"
@@ -1109,10 +1109,10 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
 def run_instruction(instruction, error, initial_env=None):
     if initial_env is None:
         initial_env = os.environ
-    print("Running Coin instruction: {}".format(' '.join(str(e) for e in instruction)))
+    log.info(f"Running Coin instruction: {' '.join(str(e) for e in instruction)}")
     result = subprocess.call(instruction, env=initial_env)
     if result != 0:
-        print("ERROR : {}".format(error))
+        log.error(f"ERROR : {error}")
         exit(result)
 
 
@@ -1121,14 +1121,14 @@ def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
     # NOTE: String must match with QT CI's storagestruct thrift
     if (hostOSVer in ["WinRT_10", "WebAssembly", "Ubuntu_18_04", "Android_ANY"]
             or hostOSVer.startswith("SLES_")):
-        print("Disabled {} from Coin configuration".format(hostOSVer))
+        log.info("Disabled {hostOSVer} from Coin configuration")
         return False
     # With 5.11 CI will create two sets of release binaries,
     # one with msvc 2015 and one with msvc 2017
     # we shouldn't release the 2015 version.
     # BUT, 32 bit build is done only on msvc 2015...
     if compiler in ["MSVC2015"] and targetArch in ["X86_64"]:
-        print("Disabled {} to {} from Coin configuration".format(compiler, targetArch))
+        log.warn(f"Disabled {compiler} to {targetArch} from Coin configuration")
         return False
     return True
 
