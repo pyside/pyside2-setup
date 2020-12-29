@@ -76,8 +76,8 @@ class SetupRunner(object):
     def construct_cmd_line_argument(name, value=None):
         """ Constructs a command line argument given name and value. """
         if not value:
-            return "--{}".format(name)
-        return "--{}={}".format(name, value)
+            return f"--{name}"
+        return f"--{name}={value}"
 
     @staticmethod
     def construct_internal_build_type_cmd_line_argument(internal_build_type):
@@ -120,8 +120,8 @@ class SetupRunner(object):
         # build.
         if config.is_internal_invocation():
             if config.internal_build_type not in config.get_allowed_internal_build_values():
-                raise RuntimeError("Invalid '{}' option given to --internal-build-type. "
-                                   .format(config.internal_build_type))
+                raise RuntimeError(f"Invalid '{config.internal_build_type}' option given to "
+                                   "--internal-build-type. ")
             self.run_setuptools_setup()
             return
 
@@ -129,8 +129,7 @@ class SetupRunner(object):
         # modules we will build and depending on that, call setup.py
         # multiple times with different arguments.
         if config.build_type not in config.get_allowed_top_level_build_values():
-            raise RuntimeError("Invalid '{}' option given to --build-type. "
-                               .format(config.build_type))
+            raise RuntimeError(f"Invalid '{config.build_type}' option given to --build-type. ")
 
         # Build everything: shiboken6, shiboken6-generator and PySide6.
         help_requested = '--help' in self.sub_argv or '-h' in self.sub_argv
@@ -158,13 +157,13 @@ class SetupRunner(object):
 
         for cmd in self.invocations_list:
             cmd_as_string = " ".join(cmd)
-            log.info("\nRunning setup:  {}\n".format(cmd_as_string))
+            log.info(f"\nRunning setup:  {cmd_as_string}\n")
             exit_code = run_process(cmd)
             if exit_code != 0:
-                msg = textwrap.dedent("""
-                    setup.py invocation failed with exit code: {}.\n\n
-                    setup.py invocation was: {}
-                    """).format(exit_code, cmd_as_string)
+                msg = textwrap.dedent(f"""
+                    setup.py invocation failed with exit code: {exit_code}.\n\n
+                    setup.py invocation was: {cmd_as_string}
+                    """)
                 raise RuntimeError(msg)
 
         if help_requested:

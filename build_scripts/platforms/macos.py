@@ -81,7 +81,7 @@ def prepare_standalone_package_macos(self, vars):
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build():
         designer_bundle = "{st_build_dir}/{st_package_name}/Designer.app".format(**vars)
-        designer_binary = "{}/Contents/MacOS/Designer".format(designer_bundle)
+        designer_binary = f"{designer_bundle}/Contents/MacOS/Designer"
         rpath = "@loader_path/../../../Qt/lib"
         macos_add_rpath(rpath, designer_binary)
 

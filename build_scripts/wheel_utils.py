@@ -65,12 +65,12 @@ def get_qt_version():
     qt_version = qtinfo.version
 
     if not qt_version:
-        m = "Failed to query the Qt version with qmake {0}".format(qtinfo.qmake_command)
-        raise DistutilsSetupError(m)
+        raise DistutilsSetupError("Failed to query the Qt version with "
+                                  f"qmake {qtinfo.qmake_command}")
 
     if LooseVersion(qtinfo.version) < LooseVersion("5.7"):
-        m = "Incompatible Qt version detected: {}. A Qt version >= 5.7 is required.".format(qt_version)
-        raise DistutilsSetupError(m)
+        raise DistutilsSetupError(f"Incompatible Qt version detected: {qt_version}. "
+                                  "A Qt version >= 5.7 is required.")
 
     return qt_version
 
@@ -82,20 +82,19 @@ def get_package_version():
     pyside_version_py = os.path.join(
         setup_script_dir, "sources", PYSIDE, "pyside_version.py")
     d = get_python_dict(pyside_version_py)
-
-    final_version = "{}.{}.{}".format(
-        d['major_version'], d['minor_version'], d['patch_version'])
+    final_version = f"{d['major_version']}.{d['minor_version']}.{d['patch_version']}"
     release_version_type = d['release_version_type']
     pre_release_version = d['pre_release_version']
     if pre_release_version and release_version_type:
-        final_version += release_version_type + pre_release_version
+        final_version = f"{final_version}{release_version_type}{pre_release_version}"
+
     if release_version_type.startswith("comm"):
-        final_version += "." + release_version_type
+        final_version = f"{final_version}.{release_version_type}"
 
     # Add the current timestamp to the version number, to suggest it
     # is a development snapshot build.
     if OPTION["SNAPSHOT_BUILD"]:
-        final_version += ".dev{}".format(get_package_timestamp())
+        final_version = f"{final_version}.dev{get_package_timestamp()}"
     return final_version
 
 
@@ -157,5 +156,5 @@ def macos_plat_name():
     deployment_target = macos_pyside_min_deployment_target()
     # Example triple "macosx-10.12-x86_64".
     plat = get_platform().split("-")
-    plat_name = "{}-{}-{}".format(plat[0], deployment_target, plat[2])
+    plat_name = f"{plat[0]}-{deployment_target}-{plat[2]}"
     return plat_name

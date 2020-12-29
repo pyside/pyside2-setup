@@ -55,7 +55,7 @@ def _effective_qmake_command(qmake, qt_version):
             sys.exit(-1)
         # Set -qt=X here.
         if "qtchooser" in os.readlink(qmake):
-            result.append("-qt={}".format(qt_version))
+            result.append(f"-qt={qt_version}")
     return result
 
 
@@ -74,7 +74,7 @@ class QtInfo(object):
         def get_qmake_command(self):
             qmake_command_string = self._qmake_command[0]
             for entry in self._qmake_command[1:]:
-                qmake_command_string += " {}".format(entry)
+                qmake_command_string = f"{qmake_command_string} {entry}"
             return qmake_command_string
 
         def get_version(self):

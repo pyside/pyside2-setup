@@ -384,7 +384,7 @@ def copy_qt_artifacts(self, copy_pdbs, vars):
         # e.g. "/home/work/qt/qtbase/bin"
         file_path_dir_name = os.path.dirname(file_full_path)
         # e.g. "Qt6Coredd"
-        maybe_debug_name = "{}d".format(file_base_name)
+        maybe_debug_name = f"{file_base_name}d"
         if self.debug:
             filter = debug
 

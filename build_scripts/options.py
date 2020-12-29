@@ -60,13 +60,13 @@ Additional options:
 
 
 def _warn_multiple_option(option):
-    warnings.warn('Option "{}" occurs multiple times on the command line.'.format(option))
+    warnings.warn(f'Option "{option}" occurs multiple times on the command line.')
 
 
 def _warn_deprecated_option(option, replacement=None):
-    w = 'Option "{}" is deprecated and may be removed in a future release.'.format(option)
+    w = f'Option "{option}" is deprecated and may be removed in a future release.'
     if replacement:
-        w = '{}\nUse "{}" instead.'.format(w, replacement)
+        w = f'{w}\nUse "{replacement}" instead.'
     warnings.warn(w)
 
 
@@ -79,12 +79,12 @@ class Options(object):
     def has_option(self, name, remove=True):
         """ Returns True if argument '--name' was passed on the command
         line. """
-        option = '--{}'.format(name)
+        option = f"--{name}"
         count = sys.argv.count(option)
         remove_count = count
         if not remove and count > 0:
             remove_count -= 1
-        for i in range(remove_count):
+        for _ in range(remove_count):
             sys.argv.remove(option)
         if count > 1:
             _warn_multiple_option(option)
@@ -115,7 +115,7 @@ class Options(object):
                     _warn_multiple_option(option)
                 else:
                     if index + 1 >= len(sys.argv):
-                        raise RuntimeError("The option {} requires a value".format(option))
+                        raise RuntimeError(f"The option {option} requires a value")
                     value = sys.argv[index + 1]
 
                 if remove:

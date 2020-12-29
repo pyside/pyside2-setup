@@ -200,7 +200,7 @@ class Config(object):
         elif self.internal_build_type == self.shiboken_generator_option_name:
             setup_kwargs['name'] = self.shiboken_generator_st_name
             setup_kwargs['description'] = "Python / C++ bindings generator"
-            setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
+            setup_kwargs['install_requires'] = [f"{self.shiboken_module_st_name}=={package_version}"]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
                     f'{SHIBOKEN} = {package_name}.scripts.shiboken_tool:main'
@@ -210,7 +210,7 @@ class Config(object):
         elif self.internal_build_type == self.pyside_option_name:
             setup_kwargs['name'] = self.pyside_st_name
             setup_kwargs['description'] = "Python bindings for the Qt cross-platform application and UI framework"
-            setup_kwargs['install_requires'] = ["{}=={}".format(self.shiboken_module_st_name, package_version)]
+            setup_kwargs['install_requires'] = [f"{self.shiboken_module_st_name}=={package_version}"]
             setup_kwargs['entry_points'] = {
                 'console_scripts': [
                     f'{PYSIDE}-uic = {package_name}.scripts.pyside_tool:uic',
@@ -238,7 +238,7 @@ class Config(object):
             with open(os.path.join(self.setup_script_dir, readme_filename)) as f:
                 readme = f.read()
         except Exception as e:
-            log.error("Couldn't read contents of {}.".format(readme_filename))
+            log.error(f"Couldn't read contents of {readme_filename}. {e}")
             raise
 
         # Don't include CHANGES.rst for now, because we have not decided
@@ -249,7 +249,7 @@ class Config(object):
                 with open(os.path.join(self.setup_script_dir, changes_filename)) as f:
                     changes = f.read()
             except Exception as e:
-                log.error("Couldn't read contents of {}".format(changes_filename))
+                log.error(f"Couldn't read contents of {changes_filename}. {e}")
                 raise
         content += readme
 

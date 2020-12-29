@@ -102,7 +102,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
         #   PySide6-5.6-5.6.4-cp27-cp27m-macosx_10_10_intel.whl
         # The PySide6 version is "5.6".
         # The Qt version built against is "5.6.4".
-        wheel_version = "{}-{}".format(self._package_version, get_qt_version())
+        wheel_version = f"{self._package_version}-{get_qt_version()}"
         components = (_safer_name(self.distribution.get_name()), wheel_version)
         if self.build_number:
             components += (self.build_number,)
@@ -175,7 +175,7 @@ class PysideBuildWheel(_bdist_wheel, DistUtilsCommandMixin):
             # XXX switch to this alternate implementation for non-pure:
             if (self.py_limited_api) or (plat_name in ('manylinux1_x86_64')):
                 return tag
-            assert tag in supported_tags, ("would build wheel with unsupported tag {}".format(tag))
+            assert tag in supported_tags, (f"would build wheel with unsupported tag {tag}")
         return tag
 
     # Copy of get_tag from bdist_wheel.py, to write a triplet Tag
