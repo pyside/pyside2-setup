@@ -105,7 +105,7 @@ MODULES_KEY = 'Modules'
 PYTHON_KEY = 'Python'
 
 DEFAULT_MODULES = "Core,Gui,Widgets,Network,Test,Qml,Quick,Multimedia,MultimediaWidgets"
-DEFAULT_CONFIG_FILE = "Modules={}\n".format(DEFAULT_MODULES)
+DEFAULT_CONFIG_FILE = f"Modules={DEFAULT_MODULES}\n"
 
 build_mode = BuildMode.NONE
 opt_dry_run = False
@@ -116,7 +116,7 @@ def which(needle):
     needles = [needle]
     if IS_WINDOWS:
         for ext in ("exe", "bat", "cmd"):
-            needles.append("{}.{}".format(needle, ext))
+            needles.append(f"{needle}.{ext}")
 
     for path in os.environ.get("PATH", "").split(os.pathsep):
         for n in needles:
@@ -127,9 +127,9 @@ def which(needle):
 
 
 def command_log_string(args, dir):
-    result = '[{}]'.format(os.path.basename(dir))
+    result = f'[{os.path.basename(dir)}]'
     for arg in args:
-        result += ' "{}"'.format(arg) if ' ' in arg else ' {}'.format(arg)
+        result += f' "{arg}"' if ' ' in arg else f' {arg}'
     return result
 
 
@@ -141,7 +141,7 @@ def execute(args):
         return
     exit_code = subprocess.call(args)
     if exit_code != 0:
-        raise RuntimeError('FAIL({}): {}'.format(exit_code, log_string))
+        raise RuntimeError(f'FAIL({exit_code}): {log_string}')
 
 
 def run_process_output(args):
@@ -190,7 +190,7 @@ def edit_config_file():
         exit_code = subprocess.call([editor(), config_file])
     except Exception as e:
         reason = str(e)
-        print('Unable to launch: {}: {}'.format(editor(), reason))
+        print(f'Unable to launch: {editor()}: {reason}')
     return exit_code
 
 
@@ -320,24 +320,24 @@ def build(target):
         arguments.append(modules)
     if IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
         arg_string = ' '.join(arguments)
-        arguments = [INCREDIBUILD_CONSOLE, '/command={}'.format(arg_string)]
+        arguments = [INCREDIBUILD_CONSOLE, f'/command={arg_string}']
 
     execute(arguments)
 
     elapsed_time = int(time.time() - start_time)
-    print('--- Done({}s) ---'.format(elapsed_time))
+    print(f'--- Done({elapsed_time}s) ---')
 
 
 def run_tests():
     """Run tests redirected into a log file with a time stamp"""
     logfile_name = datetime.datetime.today().strftime("test_%Y%m%d_%H%M.txt")
     binary = sys.executable
-    command = '"{}" testrunner.py test > {}'.format(binary, logfile_name)
+    command = f'"{binary}" testrunner.py test > {logfile_name}'
     print(command_log_string([command], os.getcwd()))
     start_time = time.time()
     result = 0 if opt_dry_run else os.system(command)
     elapsed_time = int(time.time() - start_time)
-    print('--- Done({}s) ---'.format(elapsed_time))
+    print(f'--- Done({elapsed_time}s) ---')
     return result
 
 
