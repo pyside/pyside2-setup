@@ -41,7 +41,7 @@ import fnmatch
 import os
 from ..utils import copydir, copyfile, macos_fix_rpaths_for_library, macos_add_rpath
 from ..config import config
-from ..versions import PYSIDE, SHIBOKEN
+from ..versions import PYSIDE
 
 
 def prepare_standalone_package_macos(self, vars):

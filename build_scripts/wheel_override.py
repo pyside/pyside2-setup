@@ -49,7 +49,6 @@ from .wheel_utils import get_package_version, get_qt_version, macos_plat_name
 
 try:
 
-    from distutils import log as logger
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
     from wheel.bdist_wheel import safer_name as _safer_name
     from wheel.bdist_wheel import get_abi_tag, get_platform

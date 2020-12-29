@@ -39,7 +39,6 @@
 
 import functools
 import os
-import sys
 import fnmatch
 
 from ..config import config

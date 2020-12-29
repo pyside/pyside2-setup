@@ -217,7 +217,6 @@ from distutils.sysconfig import get_python_lib
 from distutils.spawn import find_executable
 from distutils.command.build import build as _build
 from distutils.command.build_ext import build_ext as _build_ext
-from distutils.util import get_platform
 from distutils.cmd import Command
 
 from .qtinfo import QtInfo

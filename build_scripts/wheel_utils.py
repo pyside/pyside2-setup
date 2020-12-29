@@ -48,7 +48,7 @@ from distutils.version import LooseVersion
 from .options import OPTION
 from .qtinfo import QtInfo
 from .utils import memoize, get_python_dict
-from .versions import PYSIDE, SHIBOKEN
+from .versions import PYSIDE
 
 
 @memoize
