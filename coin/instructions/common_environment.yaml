@@ -131,4 +131,4 @@ instructions:
          equals_value: ICC_18
     - type: EnvironmentVariable
       variableName: LLVM_INSTALL_DIR
-      variableValue: ":{{.Env.LLVM_DYNAMIC_LIBS_100}}"
+      variableValue: "{{.Env.LLVM_DYNAMIC_LIBS_100}}"
