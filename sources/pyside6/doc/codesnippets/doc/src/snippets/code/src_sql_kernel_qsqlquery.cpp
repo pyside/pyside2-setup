@@ -57,11 +57,11 @@ SELECT forename, surname FROM people
 q = QSqlQuery("select * from employees")
 rec = q.record()
 
-print "Number of columns: %d" % rec.count()
+print("Number of columns: %d" % rec.count())
 
 nameCol = rec.indexOf("name") # index of the field "name"
 while q.next():
-    print q.value(nameCol) # output all names
+    print(q.value(nameCol))  # output all names
 //! [1]
 
 
@@ -76,7 +76,7 @@ names = ["Harald", "Boris", "Trond", ""]
 q.addBindValue(names)
 
 if not q.execBatch():
-    print q.lastError()
+    print(q.lastError())
 //! [2]
 
 

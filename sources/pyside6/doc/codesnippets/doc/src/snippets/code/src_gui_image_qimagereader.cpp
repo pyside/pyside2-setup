@@ -71,5 +71,5 @@ if reader.read(icon):
 //! [3]
 reader = QImageReader(":/image.png")
 if reader.supportsOption(QImageIOHandler.Size):
-    print "Size:", str(reader.size())
+    print("Size:", str(reader.size()))
 //! [3]

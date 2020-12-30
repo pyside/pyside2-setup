@@ -52,5 +52,5 @@
 model = QSqlQueryModel()
 model.setQuery("select * from myTable")
 if model.lastError().isValid():
-    print model.lastError()
+    print(model.lastError())
 //! [0]

@@ -51,7 +51,7 @@
 //! [0]
 socket.connectToHost("imap", 143)
 if socket.waitForConnected(1000):
-    print "Connected!"
+    print("Connected!")
 //! [0]
 
 
@@ -59,7 +59,7 @@ if socket.waitForConnected(1000):
 socket.disconnectFromHost()
     if socket.state() == QAbstractSocket.UnconnectedState or \
         socket.waitForDisconnected(1000):
-        print "Disconnected!"
+        print("Disconnected!")
 //! [1]
 
 

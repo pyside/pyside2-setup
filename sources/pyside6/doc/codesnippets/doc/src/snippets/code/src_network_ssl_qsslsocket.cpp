@@ -69,12 +69,12 @@ def incomingConnection(socketDescriptor):
 socket = QSslSocket()
 socket.connectToHostEncrypted("http.example.com", 443)
 if not socket.waitForEncrypted():
-    print socket.errorString()
+    print(socket.errorString())
     return false
 
 socket.write("GET / HTTP/1.0\r\n\r\n")
 while socket.waitForReadyRead():
-    print socket.readAll().data()
+    print(socket.readAll().data())
 //! [2]
 
 
@@ -96,5 +96,5 @@ socket.setCiphers("DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA")
 //! [5]
 socket.connectToHostEncrypted("imap", 993)
 if socket.waitForEncrypted(1000):
-    print "Encrypted!"
+    print("Encrypted!")
 //! [5]

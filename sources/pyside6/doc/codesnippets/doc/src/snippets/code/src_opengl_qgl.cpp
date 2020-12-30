@@ -72,7 +72,7 @@ myWidget = MyGLWidget(fmt, ...)
 if !myWidget.format().stereo():
     # ok, goggles off
     if !myWidget.format().hasOverlay():
-        print "Cool hardware required"
+        print("Cool hardware required")
 //! [2]
 
 
@@ -85,9 +85,9 @@ class MyGLWidget(QGLWidget):
         QGLWidget.__init__(self, QGLFormat(QGL.StencilBuffer | QGL.AlphaChannel), parent)
 
         if !format().stencil():
-            print "Could not get stencil buffer results will be suboptimal"
+            print("Could not get stencil buffer results will be suboptimal")
         if !format().alpha():
-            print "Could not get alpha channel results will be suboptimal"
+            print("Could not get alpha channel results will be suboptimal")
     ...
 //! [3]
 
@@ -146,7 +146,7 @@ class MyGLDrawer(QGLWidget):
         glClearColor(0.0, 0.0, 0.0, 0.0)
         glEnable(GL_DEPTH_TEST)
         ...
-    
+
     def resizeGL(self, w, h):
         # setup viewport, projection etc.:
         glViewport(0, 0, w, h)

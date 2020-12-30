@@ -70,7 +70,7 @@ ba[4] = 'o'
 //! [2]
 for i in range(0, ba.size()):
     if ba.at(i) >= 'a' and ba.at(i) <= 'f':
-        print "Found character in range [a-f]"
+        print("Found character in range [a-f]")
 //! [2]
 
 
@@ -86,7 +86,7 @@ x.replace(5, 3, "&")       # x == "rock & roll"
 ba = QByteArray("We must be <b>bold</b>, very <b>bold</b>")
 j = 0
 while (j = ba.indexOf("<b>", j)) != -1:
-    print "Found <b> tag at index position %d" % j
+    print("Found <b> tag at index position %d" % j)
     ++j
 //! [4]
 
@@ -120,7 +120,7 @@ QByteArray("abc").isEmpty()    # returns false
 
 //! [8]
 ba = QByteArray("Hello world");
-print ba.data();
+print(ba.data())
 //! [8]
 
 

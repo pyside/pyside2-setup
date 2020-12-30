@@ -58,5 +58,5 @@ while myModel.canFetchMore():
 model = QSqlQueryModel()
 model.setQuery("select * from MyTable")
 if model.lastError().isValid():
-    print model.lastError()
+    print(model.lastError())
 //! [1]

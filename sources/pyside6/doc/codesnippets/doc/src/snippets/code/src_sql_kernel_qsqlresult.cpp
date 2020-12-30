@@ -61,7 +61,7 @@ q.bindValue(1, col2)
 q.bindValue(2, col3)
 
 if not q.execBatch():
-    print q.lastError()
+    print(q.lastError())
 //! [0]
 
 

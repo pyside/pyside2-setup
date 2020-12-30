@@ -40,9 +40,9 @@ def search(klass, method=None):
     for module in modules:
         try:
             klass_obj = getattr(module, klass)
-            print "%s *found* on module %s" % (klass, module.__name__)
+            print("%s *found* on module %s" % (klass, module.__name__))
         except AttributeError:
-            print "%s not found on module %s" % (klass, module.__name__)
+            print("%s not found on module %s" % (klass, module.__name__))
             continue
 
         if method is None:
@@ -53,9 +53,9 @@ def search(klass, method=None):
 
             meth_name = ".".join([klass, method])
             klass_name = ".".join([module.__name__, klass])
-            print "\"%s\" *found* on class %s" % (meth_name, klass_name)
+            print("\"%s\" *found* on class %s" % (meth_name, klass_name))
         except AttributeError:
-            print "\"%s\" not found on class %s" % (method, klass)
+            print("\"%s\" not found on class %s" % (method, klass))
 
 
 def main(argv=None):

@@ -142,7 +142,7 @@ if info.isSymLink():
 //! [10]
 fi = QFileInfo("/tmp/archive.tar.gz")
 if fi.permission(QFile.WriteUser | QFile.ReadGroup):
-    print "I can change the file; my group can read the file"
+    print("I can change the file; my group can read the file")
 if fi.permission(QFile.WriteGroup | QFile.WriteOther):
-    print "The group or others can change the file"
+    print("The group or others can change the file")
 //! [10]

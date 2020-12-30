@@ -66,7 +66,7 @@ from PySide6.QtCore import *
 
 # signal handler
 def button_clicked():
-    print "button clicked"
+    print("button clicked")
 
 # main function
 if __name__ == '__main__':

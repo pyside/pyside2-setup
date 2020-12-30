@@ -51,7 +51,7 @@
 //! [0]
 it = QDirIterator("/etc", QDirIterator.Subdirectories)
 while it.hasNext():
-    print it.next()
+    print(it.next())
 
     # /etc/.
     # /etc/..

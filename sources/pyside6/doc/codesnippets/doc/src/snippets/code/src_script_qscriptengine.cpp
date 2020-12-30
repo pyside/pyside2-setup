@@ -85,7 +85,7 @@ myNumberPlusOne = myEngine.evaluate("myNumber + 1")
 result = myEngine.evaluate(...)
 if myEngine.hasUncaughtException():
     line = myEngine.uncaughtExceptionLineNumber()
-    print "uncaught exception at line", line, ":", result.toString()
+    print("uncaught exception at line", line, ":", result.toString())
 //! [4]
 
 
@@ -96,7 +96,7 @@ myEngine.globalObject().setProperty("button", scriptButton)
 
 myEngine.evaluate("button.checkable = True")
 
-print scriptButton.property("checkable").toBoolean()
+print(scriptButton.property("checkable").toBoolean())
 scriptButton.property("show").call() # call the show() slot
 //! [5]
 
@@ -146,7 +146,7 @@ engine.globalObject().setProperty("Foo", engine->Function(Foo, fooProto))
 
 //! [10]
 class Bar:
-     ... 
+     ...
 
 def constructBar(context, engine):
     bar = Bar()
@@ -301,7 +301,7 @@ qScriptRegisterSequenceMetaType<QVector<int> >(engine)
 v = engine.evaluate("[5, 1, 3, 2]")
 v.sort()
 a = engine.toScriptValue(v)
-print a.toString() # outputs "[1, 2, 3, 5]"
+print(a.toString()) # outputs "[1, 2, 3, 5]"
 //! [26]
 
 //! [27]

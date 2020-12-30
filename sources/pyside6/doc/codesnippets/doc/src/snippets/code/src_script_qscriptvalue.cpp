@@ -71,13 +71,13 @@ engine.evaluate("somePerson = { firstName: 'John', lastName: 'Doe' }")
 global_ = engine.globalObject()
 fullName = global_.property("fullName")
 who = global_.property("somePerson")
-print fullName.call(who).toString() # "John Doe"
+print(fullName.call(who).toString())  # "John Doe"
 
 engine.evaluate("function cube(x) { return x * x * x; }")
 QScriptValue cube = global_.property("cube")
 args = QScriptValueList()
 args << 3
-print cube.call(QScriptValue(), args).toNumber() # 27
+print(cube.call(QScriptValue(), args).toNumber())  # 27
 //! [2]
 
 

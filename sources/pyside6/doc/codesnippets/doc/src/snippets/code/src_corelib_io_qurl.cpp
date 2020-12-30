@@ -62,7 +62,7 @@ url = QUrl.fromEncoded("http://qtsoftware.com/List%20of%20holidays.xml")
 //! [2]
 def checkUrl(url):
     if !url.isValid():
-        print "Invalid URL: %s" % url.toString()
+        print("Invalid URL: %s" % url.toString())
         return False
 
     return True
@@ -84,13 +84,13 @@ http://www.example.com/cgi-bin/drawgraph.cgi?type-pie/color-green
 //! [5]
 baseUrl = QUrl("http://qtsoftware.com/support")
 relativeUrl = QUrl("../products/solutions")
-print baseUrl.resolved(relativeUrl).toString()
+print(baseUrl.resolved(relativeUrl).toString())
 # prints "http://qtsoftware.com/products/solutions"
 //! [5]
 
 
 //! [6]
 ba = QUrl.toPercentEncoding("{a fishy string?}", "{}", "s")
-print ba
+print(ba)
 # prints "{a fi%73hy %73tring%3F}"
 //! [6]

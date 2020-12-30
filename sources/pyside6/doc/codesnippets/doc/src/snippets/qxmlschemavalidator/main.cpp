@@ -56,9 +56,9 @@ def validateFromUrl():
 
     validator = QXmlSchemaValidator(schema)
     if validator.validate(url):
-        print "instance document is valid"
+        print("instance document is valid")
     else:
-        print "instance document is invalid"
+        print("instance document is invalid")
 //! [0]
 
 def validateFromFile():
@@ -70,9 +70,9 @@ def validateFromFile():
 
     validator = QXmlSchemaValidator(schema)
     if validator.validate(file, QUrl.fromLocalFile(file.fileName())):
-        print "instance document is valid"
+        print("instance document is valid")
     else:
-        print "instance document is invalid"
+        print("instance document is invalid")
 //! [1]
 }
 
@@ -87,9 +87,9 @@ def validateFromData():
 
     QXmlSchemaValidator validator(schema)
     if validator.validate(buffer):
-        print "instance document is valid"
+        print("instance document is valid")
     else:
-        print "instance document is invalid"
+        print("instance document is invalid")
 //! [2]
 
 def validateComplete():
@@ -105,8 +105,8 @@ def validateComplete():
 
         validator = QXmlSchemaValidator(schema)
         if validator.validate(file, QUrl.fromLocalFile(file.fileName())):
-            print "instance document is valid"
+            print("instance document is valid")
         else:
-            print "instance document is invalid"
+            print("instance document is invalid")
     }
 //! [3]

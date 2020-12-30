@@ -114,6 +114,6 @@ if __name__ == '__main__':
     # Export the object
     widget = DBusWidget(session_bus, '/DBusWidget')
 
-    print "Running example service."
+    print("Running example service.")
     app.exec_()
 

@@ -74,7 +74,7 @@ n = d.firstChild()
 while !n.isNull():
     if n.isElement():
         e = n.toElement()
-        print "Element name: %s" % e.tagName()
+        print("Element name: %s" % e.tagName())
         break
     n = n.nextSibling()
 //! [1]
@@ -124,10 +124,10 @@ QDomElement element4 = document.createElement("MyElement")
 e = # some QDomElement...
 #...
 a = e.attributeNode("href")
-print a.value()                         # prints "http://qt-project.org.com"
+print(a.value())                         # prints "http://qt-project.org.com"
 a.setValue("http://qt-project.org/doc")  # change the node's attribute
 a2 = e.attributeNode("href")
-print a2.value()                        # prints "http://qt-project.org/doc"
+print(a2.value())                        # prints "http://qt-project.org/doc"
 //! [8]
 
 
@@ -204,7 +204,7 @@ n = docElem.firstChild()
 while not n.isNull():
     e = n.toElement() # try to convert the node to an element.
     if not e.isNull():
-        print e.tagName() # the node really is an element.
+        print(e.tagName())  # the node really is an element.
     n = n.nextSibling()
 }
 

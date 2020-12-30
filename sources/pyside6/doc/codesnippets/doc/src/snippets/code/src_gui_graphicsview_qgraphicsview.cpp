@@ -113,16 +113,16 @@ view.render(painter,
 
 //! [5]
 def mousePressEvent(self, event):
-    print "There are", items(event->pos()).size(), "items at position", mapToScene(event->pos())
+    print("There are", items(event->pos()).size(), "items at position", mapToScene(event->pos()))
 //! [5]
 
 
 //! [6]
 def mousePressEvent(self, event):
     if (item = itemAt(event.pos()):
-        print "You clicked on item", item
+        print("You clicked on item", item)
     else:
-        print "You didn't click on an item."
+        print("You didn't click on an item.")
 //! [6]
 
 

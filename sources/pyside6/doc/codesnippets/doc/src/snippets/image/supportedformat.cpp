@@ -49,8 +49,8 @@
 ****************************************************************************/
 
 //! [0]
-	writer = QImageWriter()
-	writer.setFormat("png")
-	if writer.supportsOption(QImageIOHandler.Description):
-	    print "Png supports embedded text"
+    writer = QImageWriter()
+    writer.setFormat("png")
+    if writer.supportsOption(QImageIOHandler.Description):
+        print("Png supports embedded text")
 //! [0]

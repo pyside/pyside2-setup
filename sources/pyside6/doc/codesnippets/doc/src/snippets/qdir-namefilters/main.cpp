@@ -62,7 +62,7 @@ def main():
 //
     lst = d.entryInfoList()
 
-    print "     Bytes Filename"
+    print("     Bytes Filename")
     for fileInfo in lst:
-        print '%d %s' % (fileInfo.size(), fileInfo.fileName())
+        print('%d %s' % (fileInfo.size(), fileInfo.fileName()))
 

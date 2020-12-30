@@ -69,6 +69,6 @@ lineEdit.setCompleter(completer)
 //! [2]
 i = 0
 while completer.setCurrentRow(i):
-    print "%s is match number %d" % (completer.currentCompletion(), i)
+    print("%s is match number %d" % (completer.currentCompletion(), i))
     i += 1
 //! [2]
