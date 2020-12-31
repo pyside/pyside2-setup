@@ -44,8 +44,6 @@ from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_python_dict
 from build_scripts.utils import get_ci_qmake_path
-from build_scripts.coin_utils import installLibClang
-
 import os
 import datetime
 import calendar
@@ -173,7 +171,6 @@ if __name__ == "__main__":
     for env_var in ['CC', 'CXX']:
         if os.environ.get(env_var):
             del os.environ[env_var]
-    installLibClang(CI_HOST_OS)
 
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
         call_setup("3","BUILD")
