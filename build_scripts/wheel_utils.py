@@ -124,7 +124,8 @@ def macos_pyside_min_deployment_target():
 
     qt_target_split = [int(x) for x in qt_target.split('.')]
     if python_target:
-        python_target_split = [int(x) for x in python_target.split('.')]
+        # macOS Big Sur returns a number not a string
+        python_target_split = [int(x) for x in str(python_target).split('.')]
     if setup_target:
         setup_target_split = [int(x) for x in setup_target.split('.')]
 
