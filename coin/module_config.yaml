@@ -19,6 +19,9 @@ accept_configuration:
         - condition: property  # MibnGW and msvc2015 are not supported
           property: target.compiler
           not_in_values: [Mingw, MSVC2015]
+        - condition: property
+          property: host.osVersion
+          not_equals_value: MacOS_10_15
 
 upload_pyside: &upload_pyside
      type: Group
