@@ -82,6 +82,20 @@ instructions:
          equals_value: Windows
     - type: PrependToEnvironmentVariable
       variableName: PATH
+      variableValue: "{{.Env.PYTHON3_PATH}}/bin:"
+      disable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
+      variableValue: "{{.Env.PYTHON3_PATH}};"
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
       variableValue: "/Users/qt/work/install/bin:"
       enable_if:
          condition: property

@@ -1,7 +1,7 @@
 type: Group
 instructions:
   - type: ExecuteCommand
-    command: "python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
+    command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -11,7 +11,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute build instructions on osx
   - type: ExecuteCommand
-    command: "python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
+    command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:
@@ -21,7 +21,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute build instructions on Linux
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=BUILD"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=BUILD"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:
@@ -45,7 +45,7 @@ instructions:
         property: host.os
         equals_value: Windows
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat python -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=WHEEL"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=WHEEL"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
