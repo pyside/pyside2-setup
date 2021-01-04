@@ -59,6 +59,7 @@ LIBSHIBOKEN_API PyObject *multi();
 LIBSHIBOKEN_API PyObject *name();
 LIBSHIBOKEN_API PyObject *result();
 LIBSHIBOKEN_API PyObject *select_id();
+LIBSHIBOKEN_API PyObject *underscore();
 LIBSHIBOKEN_API PyObject *value();
 LIBSHIBOKEN_API PyObject *values();
 } // namespace PyName

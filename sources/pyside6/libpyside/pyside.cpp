@@ -308,6 +308,9 @@ void initQApp()
      */
     if (!qApp)
         Py_DECREF(MakeQAppWrapper(nullptr));
+
+    // PYSIDE-1470: Register a function to destroy an application from shiboken.
+    setDestroyQApplication(destroyQCoreApplication);
 }
 
 PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)

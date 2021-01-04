@@ -59,10 +59,11 @@ class qAppMacroTest(unittest.TestCase):
         classes = (QtCore.QCoreApplication,
                    QtGui.QGuiApplication,
                    QtWidgets.QApplication)
+        fil = sys.stderr
         for klass in classes:
-            print("created", klass([]))
+            print("CREATED", klass([]), file=fil); fil.flush()
             qApp.shutdown()
-            print("deleted qApp", qApp)
+            print("DELETED qApp", qApp, file=fil); fil.flush()
         # creating without deletion raises:
         QtCore.QCoreApplication([])
         with self.assertRaises(RuntimeError):

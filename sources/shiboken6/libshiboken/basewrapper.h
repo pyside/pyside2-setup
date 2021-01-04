@@ -106,6 +106,9 @@ LIBSHIBOKEN_API void SbkObjectType_SetReserved(PyTypeObject *type, int value);
 LIBSHIBOKEN_API const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type);
 LIBSHIBOKEN_API void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings);
 
+/// PYSIDE-1470: Set the function to kill a Q*Application.
+typedef void(*DestroyQAppHook)();
+LIBSHIBOKEN_API void setDestroyQApplication(DestroyQAppHook func);
 
 extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeF(void);
 extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeF(void);

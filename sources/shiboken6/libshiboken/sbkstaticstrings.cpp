@@ -61,6 +61,7 @@ STATIC_STRING_IMPL(name, "name")
 STATIC_STRING_IMPL(qApp, "qApp")
 STATIC_STRING_IMPL(result, "result")
 STATIC_STRING_IMPL(select_id, "select_id")
+STATIC_STRING_IMPL(underscore, "_")
 STATIC_STRING_IMPL(value, "value")
 STATIC_STRING_IMPL(values, "values")
 
