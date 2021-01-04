@@ -51,6 +51,7 @@ PyObject *marshal();
 PyObject *method();
 PyObject *mro();
 PyObject *overload();
+PyObject *qApp();
 PyObject *staticmethod();
 } // namespace PyName
 namespace PyMagicName

@@ -93,9 +93,10 @@ typedef void (*ObjectDestructor)(void *);
 
 typedef void (*SubTypeInitHook)(SbkObjectType *, PyObject *, PyObject *);
 
-// PYSIDE-1019: Set the function to select the current feature.
+/// PYSIDE-1019: Set the function to select the current feature.
+/// Return value is the previous content.
 typedef PyObject *(*SelectableFeatureHook)(PyTypeObject *);
-LIBSHIBOKEN_API void initSelectableFeature(SelectableFeatureHook func);
+LIBSHIBOKEN_API SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func);
 
 // PYSIDE-1019: Get access to PySide reserved bits.
 LIBSHIBOKEN_API int SbkObjectType_GetReserved(PyTypeObject *type);
@@ -105,6 +106,9 @@ LIBSHIBOKEN_API void SbkObjectType_SetReserved(PyTypeObject *type, int value);
 LIBSHIBOKEN_API const char **SbkObjectType_GetPropertyStrings(PyTypeObject *type);
 LIBSHIBOKEN_API void SbkObjectType_SetPropertyStrings(PyTypeObject *type, const char **strings);
 
+/// PYSIDE-1470: Set the function to kill a Q*Application.
+typedef void(*DestroyQAppHook)();
+LIBSHIBOKEN_API void setDestroyQApplication(DestroyQAppHook func);
 
 extern LIBSHIBOKEN_API PyTypeObject *SbkObjectType_TypeF(void);
 extern LIBSHIBOKEN_API SbkObjectType *SbkObject_TypeF(void);
@@ -118,8 +122,12 @@ struct LIBSHIBOKEN_API SbkObjectType
 };
 
 LIBSHIBOKEN_API PyObject *SbkObjectTpNew(PyTypeObject *subtype, PyObject *, PyObject *);
-// the special case of a switchable singleton
-LIBSHIBOKEN_API PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *args, PyObject *kwds);
+
+/// The special case of a switchable singleton Q*Application.
+LIBSHIBOKEN_API PyObject *SbkQAppTpNew(PyTypeObject *subtype, PyObject *, PyObject *);
+
+/// Create a new Q*Application wrapper and monitor it.
+LIBSHIBOKEN_API PyObject *MakeQAppWrapper(PyTypeObject *type);
 
 /**
  *  PYSIDE-832: Use object_dealloc instead of nullptr.

@@ -57,7 +57,6 @@ sbkstaticstrings.cpp
 bindingmanager.cpp
 threadstatesaver.cpp
 shibokenbuffer.cpp
-qapp_macro.cpp
 pep384impl.cpp
 voidptr.cpp
 typespec.cpp
@@ -142,7 +141,6 @@ install(FILES
         shibokenbuffer.h
         sbkpython.h
         pep384impl.h
-        qapp_macro.h
         voidptr.h
         typespec.h
         bufferprocs_py37.h

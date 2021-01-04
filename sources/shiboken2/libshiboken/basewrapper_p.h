@@ -97,6 +97,9 @@ struct SbkObjectPrivate
     unsigned int validCppObject : 1;
     /// Marked as true when the object constructor was called
     unsigned int cppObjectCreated : 1;
+    /// PYSIDE-1470: Marked as true if this is the Q*Application singleton.
+    /// This bit allows app deletion from shiboken?.delete() .
+    unsigned int isQAppSingleton : 1;
     /// Information about the object parents and children, may be null.
     Shiboken::ParentInfo *parentInfo;
     /// Manage reference count of objects that are referred to but not owned from.

@@ -58,6 +58,8 @@ LIBSHIBOKEN_API PyObject *loads();
 LIBSHIBOKEN_API PyObject *multi();
 LIBSHIBOKEN_API PyObject *name();
 LIBSHIBOKEN_API PyObject *result();
+LIBSHIBOKEN_API PyObject *select_id();
+LIBSHIBOKEN_API PyObject *underscore();
 LIBSHIBOKEN_API PyObject *value();
 LIBSHIBOKEN_API PyObject *values();
 } // namespace PyName
@@ -69,6 +71,7 @@ LIBSHIBOKEN_API PyObject *dict();
 LIBSHIBOKEN_API PyObject *doc();
 LIBSHIBOKEN_API PyObject *ecf();
 LIBSHIBOKEN_API PyObject *file();
+LIBSHIBOKEN_API PyObject *func();
 LIBSHIBOKEN_API PyObject *get();
 LIBSHIBOKEN_API PyObject *members();
 LIBSHIBOKEN_API PyObject *module();

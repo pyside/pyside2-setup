@@ -359,7 +359,6 @@ void CppGenerator::generateClass(QTextStream &s, const GeneratorContext &classCo
             << "#include <pyside.h>\n"
             << "#include <pysideqenum.h>\n"
             << "#include <feature_select.h>\n"
-            << "#include <qapp_macro.h>\n\n"
             << "QT_WARNING_DISABLE_DEPRECATED\n\n";
      }
 
@@ -4194,15 +4193,14 @@ void CppGenerator::writeClassDefinition(QTextStream &s,
             tp_new = QLatin1String("SbkDummyNew /* PYSIDE-595: Prevent replacement "
                                    "of \"0\" with base->tp_new. */");
         }
-        tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
     }
     else if (isQApp) {
         tp_new = QLatin1String("SbkQAppTpNew"); // PYSIDE-571: need singleton app
     }
     else {
         tp_new = QLatin1String("SbkObjectTpNew");
-        tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
     }
+    tp_flags.append(QLatin1String("|Py_TPFLAGS_HAVE_GC"));
 
     QString tp_richcompare;
     if (!metaClass->isNamespace() && metaClass->hasComparisonOperatorOverload())
@@ -5970,7 +5968,6 @@ bool CppGenerator::finishGeneration()
         s << "#include <pyside.h>\n";
         s << "#include <pysideqenum.h>\n";
         s << "#include <feature_select.h>\n";
-        s << "#include <qapp_macro.h>\n";
     }
 
     s << "#include \"" << getModuleHeaderFileName() << '"' << Qt::endl << Qt::endl;
