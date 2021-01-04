@@ -100,19 +100,20 @@ class FeaturesTest(unittest.TestCase):
         for bit in range(2, 8):
             # We are cheating here, since the functions are in the globals.
 
-            eval(compile(dedent("""
+            bit_pow = 1 << bit
+            eval(compile(dedent(f"""
 
-        def tst_bit{0}(flag, self, bits):
+        def tst_bit{bit}(flag, self, bits):
             if flag == 0:
                 with self.assertRaises(AttributeError):
-                    QtCore.QCborArray.fake_feature_{1:02x}
+                    QtCore.QCborArray.fake_feature_{bit_pow:02x}
                 with self.assertRaises(KeyError):
-                    QtCore.QCborArray.__dict__["fake_feature_{1:02x}"]
+                    QtCore.QCborArray.__dict__["fake_feature_{bit_pow:02x}"]
             else:
-                QtCore.QCborArray.fake_feature_{1:02x}
-                QtCore.QCborArray.__dict__["fake_feature_{1:02x}"]
+                QtCore.QCborArray.fake_feature_{bit_pow:02x}
+                QtCore.QCborArray.__dict__["fake_feature_{bit_pow:02x}"]
 
-                        """).format(bit, 1 << bit), "<string>", "exec"), globals(), edict)
+                        """), "<string>", "exec"), globals(), edict)
         globals().update(edict)
         feature_list = __feature__._really_all_feature_names
         func_list = [tst_bit0, tst_bit1, tst_bit2, tst_bit3,
@@ -120,14 +121,14 @@ class FeaturesTest(unittest.TestCase):
 
         for idx in range(0x100):
             __feature__.set_selection(0)
-            config = "feature_{:02x}".format(idx)
+            config = f"feature_{idx:02x}"
             print()
-            print("--- Feature Test Config `{}` ---".format(config))
+            print(f"--- Feature Test Config `{config}` ---")
             print("Imports:")
             for bit in range(8):
                 if idx & 1 << bit:
                     feature = feature_list[bit]
-                    text = "from __feature__ import {}".format(feature)
+                    text = f"from __feature__ import {feature}"
                     print(text)
                     eval(compile(text, "<string>", "exec"), globals(), edict)
             for bit in range(8):

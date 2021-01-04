@@ -39,8 +39,7 @@ from PySide6.QtCore import QOperatingSystemVersion
 class TestQOperatingSystemVersion(unittest.TestCase):
     def test(self):
         ov = QOperatingSystemVersion.current()
-        name = "{} v{}.{}.{}".format(ov.name(), ov.majorVersion(),
-                                     ov.minorVersion(), ov.microVersion())
+        name = f"{ov.name()} v{ov.majorVersion()}.{ov.minorVersion()}.{ov.microVersion()}"
         print(name)
 
 if __name__ == '__main__':

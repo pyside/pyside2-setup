@@ -88,7 +88,7 @@ the Form, so you have to add it after the `init()` function:
 
     # Greets the user
     def greetings(self):
-        print("Hello {}".format(self.edit.text()))
+        print(f"Hello {self.edit.text()}")
 
 Our function just prints the contents of the `QLineEdit` to the
 python console. We have access to the text by means of the
@@ -133,7 +133,7 @@ Here is the complete code for this tutorial:
 
         # Greets the user
         def greetings(self):
-            print("Hello %s" % self.edit.text())
+            print(f"Hello {self.edit.text()}")
 
     if __name__ == '__main__':
         # Create the Qt Application

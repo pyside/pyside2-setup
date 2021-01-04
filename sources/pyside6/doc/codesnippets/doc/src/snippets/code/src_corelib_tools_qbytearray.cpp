@@ -86,7 +86,7 @@ x.replace(5, 3, "&")       # x == "rock & roll"
 ba = QByteArray("We must be <b>bold</b>, very <b>bold</b>")
 j = 0
 while (j = ba.indexOf("<b>", j)) != -1:
-    print("Found <b> tag at index position %d" % j)
+    print(f"Found <b> tag at index position {j}")
     ++j
 //! [4]
 

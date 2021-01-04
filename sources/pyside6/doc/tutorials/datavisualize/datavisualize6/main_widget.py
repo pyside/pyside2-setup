@@ -127,5 +127,6 @@ class Widget(QWidget):
         self.series.attachAxis(self.axis_y)
 
         # Getting the color from the QChart to use it on the QTableView
-        self.model.color = "{}".format(self.series.pen().color().name())
+        color_name = self.series.pen().color().name()
+        self.model.color = f"{color_name}"
 

@@ -69,9 +69,9 @@ fmt = QGLFormat()
 fmt.setOverlay(True)
 fmt.setStereo(True)
 myWidget = MyGLWidget(fmt, ...)
-if !myWidget.format().stereo():
+if not myWidget.format().stereo():
     # ok, goggles off
-    if !myWidget.format().hasOverlay():
+    if not myWidget.format().hasOverlay():
         print("Cool hardware required")
 //! [2]
 
@@ -84,9 +84,9 @@ class MyGLWidget(QGLWidget):
     def __init__(self, parent):
         QGLWidget.__init__(self, QGLFormat(QGL.StencilBuffer | QGL.AlphaChannel), parent)
 
-        if !format().stencil():
+        if not format().stencil():
             print("Could not get stencil buffer results will be suboptimal")
-        if !format().alpha():
+        if not format().alpha():
             print("Could not get alpha channel results will be suboptimal")
     ...
 //! [3]
@@ -126,9 +126,9 @@ cx = QGLContext()
 f = QGLFormat()
 f.setStereo(True)
 cx.setFormat(f)
-if !cx.create():
+if not cx.create():
     exit() # no OpenGL support, or cannot render on the specified paintdevice
-if !cx.format().stereo():
+if not cx.format().stereo():
     exit() # could not create stereo context
 //! [7]
 

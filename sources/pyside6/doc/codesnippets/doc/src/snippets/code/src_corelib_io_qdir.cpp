@@ -63,8 +63,8 @@ QDir("images/landscape.png")
 
 
 //! [2]
-QDir("Documents/Letters/Applications").dirName() # "Applications"
-QDir().dirName()                                 # "."
+QDir("Documents/Letters/Applications").dirName()  # "Applications"
+QDir().dirName()                                  # "."
 //! [2]
 
 
@@ -88,8 +88,8 @@ if not dir.cd("tmp"):             # "/tmp"
     print("Cannot find the \"/tmp\" directory")
 else:
     file = QFile(dir.filePath("ex1.txt"))   # "/tmp/ex1.txt"
-    if !file.open(QIODevice.ReadWrite):
-        print("Cannot create the file %s" % (file.name()))
+    if not file.open(QIODevice.ReadWrite):
+        print(f"Cannot create the file {file.name()}")
 //! [5]
 
 
@@ -115,7 +115,7 @@ s = dir.relativeFilePath("/home/mary/file.txt")     # s is "../mary/file.txt"
 
 
 //! [8]
-QDir.setSearchPaths("icons", [QDir.homePath() + "/images"])
+QDir.setSearchPaths("icons", [f"{QDir.homePath()}/images"])
 QDir.setSearchPaths("docs", [":/embeddedDocuments"])
 ...
 pixmap = QPixmap("icons:undo.png")  # will look for undo.png in QDir::homePath() + "/images"

@@ -103,7 +103,7 @@ class _NotCalled(str):
     real object is needed, the wrapper can simply be called.
     """
     def __repr__(self):
-        return "{}({})".format(type(self).__name__, self)
+        return f"{type(self).__name__}({self})"
 
     def __call__(self):
         from shibokensupport.signature.mapping import __dict__ as namespace
@@ -128,7 +128,7 @@ class Missing(_NotCalled):
     def __repr__(self):
         if USE_PEP563:
             return _NotCalled.__repr__(self)
-        return '{}("{}")'.format(type(self).__name__, self)
+        return f'{type(self).__name__}("{self}")'
 
 
 class Invalid(_NotCalled):
@@ -149,8 +149,7 @@ class _Parameterized(object):
         self.__name__ = self.__class__.__name__
 
     def __repr__(self):
-        return "{}({})".format(
-            type(self).__name__, self.type.__name__)
+        return f"{type(self).__name__}({self.type.__name__})"
 
 # Mark the primitive variables to be moved into the result.
 class ResultVariable(_Parameterized):

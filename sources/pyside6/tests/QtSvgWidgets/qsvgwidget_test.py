@@ -43,8 +43,8 @@ from PySide6.QtSvgWidgets import QSvgWidget
 class QSvgWidgetTest(unittest.TestCase):
 
     def testLoad(self):
-        dir =  os.path.dirname(__file__)
-        tigerPath = QDir.cleanPath("{}/../QtSvg/tiger.svg".format(dir))
+        directory =  os.path.dirname(__file__)
+        tigerPath = QDir.cleanPath(f"{directory}/../QtSvg/tiger.svg")
         self.assertTrue(QFileInfo.exists(tigerPath))
 
         app = QApplication([])

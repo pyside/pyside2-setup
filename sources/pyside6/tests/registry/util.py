@@ -147,8 +147,8 @@ def qt_version():
 
 # Format a registry file name for version.
 def _registry_filename(version, use_ci_module):
-    name = "exists_{}_{}_{}_{}{}.py".format(platform_name,
-        version[0], version[1], version[2], "_ci" if use_ci_module else "")
+    ext_ci = "_ci" if use_ci_module else ""
+    name = f"exists_{platform_name}_{version[0]}_{version[1]}_{version[2]}{ext_ci}.py"
     return os.path.join(os.path.dirname(__file__), name)
 
 # Return the expected registry file name.

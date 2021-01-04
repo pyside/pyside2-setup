@@ -70,5 +70,5 @@ manager.get(request2)
 @Slot(QNetworkReply)
 def replyFinished(reply):
     fromCache = reply.attribute(QNetworkRequest.SourceIsFromCacheAttribute)
-    print("page from cache? %d" % fromCache)
+    print(f"page from cache? {fromCache}")
 //! [2]

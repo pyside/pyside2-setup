@@ -110,11 +110,11 @@ class InheritanceGraph(object):
         """
         todoc = importClassOrModule(name)
         if not todoc and currmodule is not None:
-            todoc = importClassOrModule(currmodule + '.' + name)
+            todoc = importClassOrModule(f"{currmodule}.{name}")
         if not todoc:
-            moduleStr = '(module {})'.format(currmodule) if currmodule else ''
-            raise InheritanceException('Could not import class {} specified for '
-                                       'inheritance diagram {}.'.format(name, moduleStr))
+            moduleStr = f'(module {currmodule})' if currmodule else ''
+            raise InheritanceException(f'Could not import class {name} specified for '
+                                       f'inheritance diagram {moduleStr}.')
         if inspect.isclass(todoc):
             return [todoc]
         elif inspect.ismodule(todoc):
@@ -123,8 +123,8 @@ class InheritanceGraph(object):
                 if inspect.isclass(cls) and cls.__module__ == todoc.__name__:
                     classes.append(cls)
             return classes
-        raise InheritanceException('%r specified for inheritance diagram is '
-                                   'not a class or module' % name)
+        raise InheritanceException(f'{name} specified for inheritance diagram is '
+                                   'not a class or module')
 
     def _import_classes(self, class_names, currmodule):
         """Import a list of classes."""
@@ -176,7 +176,7 @@ class InheritanceGraph(object):
         if module == '__builtin__':
             fullname = cls.__name__
         else:
-            fullname = '%s.%s' % (module, cls.__qualname__)
+            fullname = f"{module}.{cls.__qualname__)}"
         if parts == 0:
             return fullname
         name_parts = fullname.split('.')
@@ -210,7 +210,7 @@ class InheritanceGraph(object):
         return ','.join(['%s=%s' % x for x in attrs.items()])
 
     def _format_graph_attrs(self, attrs):
-        return ''.join(['%s=%s;\n' % x for x in attrs.items()])
+        return ''.join([f"{x[0]}={x[1]};\n" for x in attrs.items()])
 
     def generate_dot(self, name, urls={}, env=None,
                      graph_attrs={}, node_attrs={}, edge_attrs={}):

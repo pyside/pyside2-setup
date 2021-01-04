@@ -70,11 +70,11 @@ QHostInfo.lookupHost("www.kde.org", self.lookedUp)
 //! [3]
 def lookedUp(host):
     if host.error() != QHostInfo.NoError:
-        print("Lookup failed: %s" % host.errorString())
+        print(f"Lookup failed: {host.errorString()}")
         return
 
     for address in host.addresses():
-        print("Found address: %s" % address.toString())
+        print(f"Found address: {address.toString()}")
 //! [3]
 
 

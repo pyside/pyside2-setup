@@ -135,7 +135,7 @@ def put_into_package(package, module, override=None):
     if package:
         setattr(package, name, module)
     # put into sys.modules as a package to allow all import options
-    fullname = "{}.{}".format(_get_modname(package), name) if package else name
+    fullname = f"{_get_modname(package)}.{name}" if package else name
     _set_modname(module, fullname)
     # publish new dotted name in sys.modules
     sys.modules[fullname] = module
@@ -147,7 +147,7 @@ def list_modules(message):
                               if hasattr(value, "__file__")}
     print("SYS.MODULES", message, len(sys.modules), len(ext_modules))
     for (name, module) in sorted(ext_modules.items()):
-        print("  {:23}".format(name), repr(module)[:70])
+        print(f"  {name:23}", repr(module)[:70])
 
 
 orig_typing = True

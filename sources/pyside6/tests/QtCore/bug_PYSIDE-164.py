@@ -51,7 +51,7 @@ class Receiver(QObject):
         self.eventloop = eventloop
 
     def receive(self, number):
-        print("Received number: %d" % number)
+        print(f"Received number: {number}")
         self.eventloop.exit(0)
 
 

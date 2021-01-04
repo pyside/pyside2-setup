@@ -64,5 +64,5 @@ def main():
 
     print("     Bytes Filename")
     for fileInfo in lst:
-        print('%d %s' % (fileInfo.size(), fileInfo.fileName()))
+        print("{fileInfo.size()} {fileInfo.fileName()}")
 

@@ -113,7 +113,7 @@ view.render(painter,
 
 //! [5]
 def mousePressEvent(self, event):
-    print("There are", items(event->pos()).size(), "items at position", mapToScene(event->pos()))
+    print("There are", items(event->position()).size(), "items at position", mapToScene(event->position()))
 //! [5]
 
 

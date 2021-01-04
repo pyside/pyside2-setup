@@ -67,11 +67,11 @@ if __name__ == "__main__":
    try:
       t.waitfor()
    except TimeoutException:
-      print("timeout - PID: %d" % (t.proc.pid))
+      print(f"timeout - PID: {t.proc.pid}")
       #TODO: detect SO and kill accordingly
       #Linux
       os.kill(t.proc.pid, 9)
       #Windows (not tested)
       #subprocess.Popen("taskkill /F /T /PID %i"%handle.pid , shell=True)
-   print("exit code: %d" % (t.proc.poll()))
+   print(f"exit code: {t.proc.poll()}")
 

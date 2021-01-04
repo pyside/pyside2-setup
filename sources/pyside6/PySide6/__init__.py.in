@@ -57,7 +57,7 @@ def _setupQtDirectories():
         import shiboken6
     except Exception:
         paths = ', '.join(sys.path)
-        print('PySide6/__init__.py: Unable to import shiboken6 from {}'.format(paths),
+        print(f"PySide6/__init__.py: Unable to import shiboken6 from {paths}",
               file=sys.stderr)
         raise
 

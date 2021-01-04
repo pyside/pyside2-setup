@@ -35,9 +35,9 @@ def get_dir_env_var(var_name):
     """Return a directory set by an environment variable"""
     result = os.environ.get(var_name)
     if not result:
-        raise ValueError('{} is not set!'.format(var_name))
+        raise ValueError(f'{var_name} is not set!')
     if not os.path.isdir(result):
-        raise ValueError('{} is not a directory!'.format(result))
+        raise ValueError(f'{result} is not a directory!')
     return result
 
 
@@ -71,7 +71,7 @@ def _prepend_path_var(var_name, paths):
     old_paths = os.environ.get(var_name)
     new_paths = os.pathsep.join(paths)
     if old_paths:
-        new_paths += '{}{}'.format(os.pathsep, old_paths)
+        new_paths += f'{os.pathsep}{old_paths}'
     os.environ[var_name] = new_paths
 
 

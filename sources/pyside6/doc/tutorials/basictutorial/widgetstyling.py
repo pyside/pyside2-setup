@@ -62,7 +62,7 @@ class Widget(QWidget):
 
         menu_widget = QListWidget()
         for i in range(10):
-            item = QListWidgetItem("Item {}".format(i))
+            item = QListWidgetItem(f"Item {i}")
             item.setTextAlignment(Qt.AlignCenter)
             menu_widget.addItem(item)
 

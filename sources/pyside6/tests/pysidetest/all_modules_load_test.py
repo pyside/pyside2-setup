@@ -45,7 +45,7 @@ class AllModulesImportTest(unittest.TestCase):
     def testAllModulesCanImport(self):
         # would also work: exec("from PySide6 import *")
         for name in PySide6.__all__:
-            exec("import PySide6.{}".format(name))
+            exec(f"import PySide6.{name}")
 
 if __name__ == '__main__':
     unittest.main()

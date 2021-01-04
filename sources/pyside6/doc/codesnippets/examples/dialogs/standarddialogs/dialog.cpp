@@ -52,14 +52,14 @@
     i, ok = QInputDialog().getInteger(self, "QInputDialog().getInteger()",
                                      "Percentage:", 25, 0, 100, 1)
     if ok:
-        self.integerLabel.setText("{}%".format(i))
+        self.integerLabel.setText(f"{i}%")
 //! [0]
 
 //! [1]
     d, ok = QInputDialog().getDouble(self, "QInputDialog().getDouble()",
                                        "Amount:", 37.56, -10000, 10000, 2)
     if ok:
-        doubleLabel.setText("${}".format())
+        doubleLabel.setText(f"${d}")
 //! [1]
 
 //! [2]

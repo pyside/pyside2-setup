@@ -62,7 +62,7 @@ url = QUrl.fromEncoded("http://qtsoftware.com/List%20of%20holidays.xml")
 //! [2]
 def checkUrl(url):
     if !url.isValid():
-        print("Invalid URL: %s" % url.toString())
+        print(f"Invalid URL: {url.toString()}")
         return False
 
     return True

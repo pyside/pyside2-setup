@@ -66,7 +66,7 @@ class CustomTableModel(QAbstractTableModel):
         if orientation == Qt.Horizontal:
             return ("Date", "Magnitude")[section]
         else:
-            return "{}".format(section)
+            return f"{section}"
 
     def data(self, index, role=Qt.DisplayRole):
         column = index.column()
@@ -74,11 +74,11 @@ class CustomTableModel(QAbstractTableModel):
 
         if role == Qt.DisplayRole:
             if column == 0:
-                raw_date = self.input_dates[row]
-                date = "{}".format(raw_date.toPython())
+                date = self.input_dates[row].toPython()
                 return date[:-3]
             elif column == 1:
-                return "{:.2f}".format(self.input_magnitudes[row])
+                magnitude = self.input_magnitudes[row]
+                return f"{magnitude:.2f}"
         elif role == Qt.BackgroundRole:
             return QColor(Qt.white)
         elif role == Qt.TextAlignmentRole:

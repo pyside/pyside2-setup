@@ -45,7 +45,7 @@ class TestQMessageAuthenticationCode (unittest.TestCase):
 
     def setUp(self):
         pid = QCoreApplication.applicationPid()
-        self._fileName = "{}/pqlockfiletest{}.tmp".format(QDir.tempPath(), pid)
+        self._fileName = f"{QDir.tempPath()}/pqlockfiletest{pid}.tmp"
 
     def tearDown(self):
         if (os.path.exists(self._fileName)):

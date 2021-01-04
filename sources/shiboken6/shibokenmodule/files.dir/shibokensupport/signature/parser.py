@@ -141,11 +141,11 @@ def _parse_line(line):
 def make_good_value(thing, valtype):
     try:
         if thing.endswith("()"):
-            thing = 'Default("{}")'.format(thing[:-2])
+            thing = f'Default("{thing[:-2]}")'
         else:
             ret = eval(thing, namespace)
             if valtype and repr(ret).startswith("<"):
-                thing = 'Instance("{}")'.format(thing)
+                thing = f'Instance("{thing}")'
         return eval(thing, namespace)
     except Exception:
         pass
@@ -153,7 +153,7 @@ def make_good_value(thing, valtype):
 
 def try_to_guess(thing, valtype):
     if "." not in thing and "(" not in thing:
-        text = "{}.{}".format(valtype, thing)
+        text = f"{valtype}.{thing}"
         ret = make_good_value(text, valtype)
         if ret is not None:
             return ret
@@ -183,7 +183,7 @@ def _resolve_value(thing, valtype, line):
         map = type_map[valtype]
         # typing.Any: '_SpecialForm' object has no attribute '__name__'
         name = get_name(map) if hasattr(map, "__name__") else str(map)
-        thing = "zero({})".format(name)
+        thing = f"zero({name})"
     if thing in type_map:
         return type_map[thing]
     res = make_good_value(thing, valtype)
@@ -194,11 +194,11 @@ def _resolve_value(thing, valtype, line):
     if res is not None:
         type_map[thing] = res
         return res
-    warnings.warn("""pyside_type_init:
+    warnings.warn(f"""pyside_type_init:
 
-        UNRECOGNIZED:   {!r}
-        OFFENDING LINE: {!r}
-        """.format(thing, line), RuntimeWarning)
+        UNRECOGNIZED:   {thing!r}
+        OFFENDING LINE: {line!r}
+        """, RuntimeWarning)
     return thing
 
 
@@ -397,7 +397,8 @@ def fix_variables(props, line):
         if len(retvars) == 1:
             returntype = retvars[0]
         else:
-            typestr = "typing.Tuple[{}]".format(", ".join(map(to_string, retvars)))
+            retvars_str = ", ".join(map(to_string, retvars))
+            typestr = f"typing.Tuple[{retvars_str}]"
             returntype = eval(typestr, namespace)
         props.annotations["return"] = returntype
     props.varnames = tuple(varnames)
@@ -425,7 +426,7 @@ def fixup_multilines(lines):
             nmulti = len(multi_lines)
             if nmulti > 1:
                 for idx, line in enumerate(multi_lines):
-                    res.append("{}:{}".format(nmulti-idx-1, line))
+                    res.append(f"{nmulti-idx-1}:{line}")
             else:
                 res.append(multi_lines[0])
             multi_lines = []
@@ -436,7 +437,7 @@ def fixup_multilines(lines):
 
 def pyside_type_init(type_key, sig_strings):
     dprint()
-    dprint("Initialization of type key '{}'".format(type_key))
+    dprint(f"Initialization of type key '{type_key}'")
     update_mapping()
     lines = fixup_multilines(sig_strings)
     ret = {}

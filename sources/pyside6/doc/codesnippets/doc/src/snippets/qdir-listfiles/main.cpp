@@ -59,6 +59,6 @@ directory.setFilter(QDir.Files | QDir.Hidden | QDir.NoSymLinks)
 directory.setSorting(QDir.Size | QDir.Reversed)
 
 for entry in directory.entryInfoList():
-    print("%s %s" % (entry.size(), entry.fileName()))
+    print(f"{entry.size()} {entry.fileName()}")
 
 //! [0]

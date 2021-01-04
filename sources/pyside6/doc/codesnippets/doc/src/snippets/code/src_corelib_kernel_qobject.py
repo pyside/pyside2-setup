@@ -96,8 +96,7 @@ layout.inherits("QLayoutItem")      # returns false
 
 
 //! [5]
-print("MyClass.setPrecision(): ({}) invalid precision {}".format(qPrintable(objectName()),
-                                                                 newPrecision))
+print(f"MyClass.setPrecision(): ({qPrintable(objectName())}) invalid precision {newPrecision}"
 //! [5]
 
 

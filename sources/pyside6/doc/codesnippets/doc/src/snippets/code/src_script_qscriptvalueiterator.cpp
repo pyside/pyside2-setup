@@ -54,7 +54,7 @@ object = QScriptValue()
 it = QScriptValueIterator(object)
 while it.hasNext():
     it.next()
-    print("%s:%s" % (it.name(), it.value().toString()))
+    print(f"{it.name()}:{it.value().toString()}")
 //! [0]
 
 
@@ -74,5 +74,5 @@ while it.hasNext():
     it.next()
     if it.flags() & QScriptValue::SkipInEnumeration:
         continue
-    print("found enumerated property: %s" % it.name())
+    print(f"found enumerated property: {it.name()}")
 //! [2]

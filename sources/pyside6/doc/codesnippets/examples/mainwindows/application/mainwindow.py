@@ -281,7 +281,7 @@ def writeSettings(self):
 //! [40]
 def maybeSave(self):
 //! [40] //! [41]
-    if textEdit.document()->isModified():
+    if textEdit.document().isModified():
         ret = QMessageBox.warning(self, tr("Application"),
                                   tr("The document has been modified.\n"
                                      "Do you want to save your changes?"),
@@ -299,7 +299,7 @@ def loadFile(self, fileName):
     file = QFile(fileName)
     if !file.open(QFile.ReadOnly | QFile.Text):
         QMessageBox.warning(self, tr("Application"), tr("Cannot read file "
-            "{}:\n{}.".format(fileName, file.errorString())))
+            f"{fileName}:\n{file.errorString()}."))
         return
 
     in = QTextStream(file)

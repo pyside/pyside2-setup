@@ -163,10 +163,11 @@ class QMdiSubWindow(QMainWindow):
             child = windows.at(i).widget()
 
             text = ""
+            child_file = child.userFriendlyCurrentFile()
             if i < 9:
-                text = "{} {}".format(i + 1, child.userFriendlyCurrentFile())
+                text = f"&{i + 1} {child_file}"
             else:
-                text = "{} {}".format(i + 1, child.userFriendlyCurrentFile())
+                text = f"{i + 1} {child_file}"
 
             action  = windowMenu.addAction(text)
             action.setCheckable(True)

@@ -74,7 +74,7 @@ n = d.firstChild()
 while !n.isNull():
     if n.isElement():
         e = n.toElement()
-        print("Element name: %s" % e.tagName())
+        print(f"Element name: {e.tagName()}")
         break
     n = n.nextSibling()
 //! [1]

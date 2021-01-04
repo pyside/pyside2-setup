@@ -46,7 +46,7 @@ import os, json, subprocess, sys, warnings
 def indent(lines, indent):
     result = ''
     for l in lines:
-        result += "{}{}\n".format(indent, l)
+        result = f"{result}{indent}{l}\n"
     return result
 
 rstHeader="""Licenses Used in Qt for Python
@@ -76,13 +76,13 @@ code licensed under third-party opensource licenses:
 """
 
 def rstHeadline(title):
-    return '{}\n{}\n'.format(title, '-' * len(title))
+    return f"{title}\n{'-' * len(title)}\n"
 
 def rstUrl(title, url):
-    return '`{} <{}>`_'.format(title, url)
+    return f"`{title} <{url}>`_"
 
 def rstLiteralBlock(lines):
-    return '::\n\n' + indent(lines, '    ') + '\n\n'
+    return f"::\n\n{indent(lines, '    ')}\n\n"
 
 def rstLiteralBlockFromText(text):
     return rstLiteralBlock(text.strip().split('\n'))
@@ -94,21 +94,19 @@ def readFile(fileName):
 def runScanner(directory, targetFileName):
     # qtattributionsscanner recursively searches for qt_attribution.json files
     # and outputs them in JSON with the paths of the 'LicenseFile' made absolute
-    command = 'qtattributionsscanner --output-format json {}'.format(directory)
+    command = f'qtattributionsscanner --output-format json {directory}'
     jsonS = subprocess.check_output(command, shell=True)
     if not jsonS:
-        raise RuntimeError('{} failed to produce output.'.format(command))
+        raise RuntimeError(f'{command} failed to produce output.')
 
     with open(targetFileName, 'w') as targetFile:
         targetFile.write(rstHeader)
         for entry in json.loads(jsonS.decode('utf-8')):
-            content = '{}\n{}\n{}\n\n'.format(rstHeadline(entry['Name']),
-                entry['Description'], entry['QtUsage'])
+            content = f"{entry['Name']}\n{entry['Description']}\n{entry['QtUsage']}\n\n"
             url = entry['Homepage']
             version = entry['Version']
             if url and version:
-                content += '{}, upstream version: {}\n\n'.format(
-                    rstUrl('Project Homepage', url), version)
+                content = f"{content}{rstUrl('Project Homepage', url)}, upstream version: {version}\n\n"
             copyright = entry['Copyright']
             if copyright:
                 content += rstLiteralBlockFromText(copyright)
@@ -118,8 +116,7 @@ def runScanner(directory, targetFileName):
                 if os.path.isfile(licenseFile):
                     content += rstLiteralBlock(readFile(licenseFile))
                 else:
-                    warnings.warn('"{}" is not a file'.format(licenseFile),
-                                  RuntimeWarning)
+                    warnings.warn(f'"{licenseFile}" is not a file', RuntimeWarning)
             targetFile.write(content)
 
 if len(sys.argv) < 3:

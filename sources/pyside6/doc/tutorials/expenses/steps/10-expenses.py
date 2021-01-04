@@ -118,7 +118,7 @@ class Widget(QWidget):
 
         self.table.insertRow(self.items)
         description_item = QTableWidgetItem(des)
-        price_item = QTableWidgetItem("{:.2f}".format(float(price)))
+        price_item = QTableWidgetItem(f"{float(price):.2f}")
         price_item.setTextAlignment(Qt.AlignRight)
 
         self.table.setItem(self.items, 0, description_item)
@@ -158,7 +158,7 @@ class Widget(QWidget):
         data = self._data if not data else data
         for desc, price in data.items():
             description_item = QTableWidgetItem(desc)
-            price_item = QTableWidgetItem("{:.2f}".format(price))
+            price_item = QTableWidgetItem(f"{price:.2f}")
             price_item.setTextAlignment(Qt.AlignRight)
             self.table.insertRow(self.items)
             self.table.setItem(self.items, 0, description_item)

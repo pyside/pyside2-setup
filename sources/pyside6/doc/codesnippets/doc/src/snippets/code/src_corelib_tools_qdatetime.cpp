@@ -119,7 +119,7 @@ QTime.isValid(22, 5,  62) # returns False
 
 
 //! [10]
-t = QTime()
+t = QElapsedTimer()
 t.start()
 some_lengthy_task()
 print("Time elapsed: %d ms" % t.elapsed())

@@ -171,7 +171,7 @@ def QSqlQuery_snippets():
     i = query.boundValues()
     while i.hasNext():
         i.next()
-        print(i.key(), ": ", i.value())
+        print(f"{i.key()}:{i.value()}")
 //! [14]
 
     # examine with positional binding
@@ -381,7 +381,7 @@ def sql_intro_snippets():
     for i in range(model.rowCount()):
         name = model.record(i).value("name")
         salary = model.record(i).value("salary")
-        print("%s: %d" % (name, salary))
+        print(f"{name}: {salary}")
 
 //! [41]
 

@@ -51,5 +51,5 @@ pre_release_version = "1"
 
 if __name__ == '__main__':
     # Used by CMake.
-    print('{0};{1};{2};{3};{4}'.format(major_version, minor_version, patch_version,
-                                       release_version_type, pre_release_version))
+    print(f'{major_version};{minor_version};{patch_version};'
+          f'{release_version_type};{pre_release_version}')

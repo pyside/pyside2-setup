@@ -122,7 +122,7 @@ class MainTest(unittest.TestCase):
         """
         for app in "QtWidgets.QApplication", "QtGui.QGuiApplication", "QtCore.QCoreApplication":
             try:
-                exec("qApp = PySide6.{0}([]) or PySide6.{0}.instance()".format(app))
+                exec(f"qApp = PySide6.{app}([]) or PySide6.{app}.instance()")
                 break
             except AttributeError:
                 continue

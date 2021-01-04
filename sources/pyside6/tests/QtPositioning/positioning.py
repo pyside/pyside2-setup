@@ -44,7 +44,7 @@ class QPositioningTestCase(unittest.TestCase):
         source = QGeoPositionInfoSource.createDefaultSource(None)
         self.assertTrue(source is not None)
         name = source.sourceName()
-        print('QtPositioning source: {}'.format(name))
+        print(f"QtPositioning source: {name}")
         self.assertTrue(name)
 
 if __name__ == "__main__":

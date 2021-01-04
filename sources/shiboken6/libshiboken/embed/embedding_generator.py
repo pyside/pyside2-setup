@@ -214,7 +214,8 @@ def _embed_bytefile(fin, fout, is_text):
     use_ord = sys.version_info[0] == 2
     for i in range(0, len(binstr), 16):
         for c in bytes(binstr[i : i + 16]):
-            print("{:#4},".format(ord(c) if use_ord else c), file=fout, end="")
+            ord_c = ord(c) if use_ord else c
+            print(f"{ord_c:#4},", file=fout, end="")
         print(file=fout)
     print("/* End Of File */", file=fout)
 

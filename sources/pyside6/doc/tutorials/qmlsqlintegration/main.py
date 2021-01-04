@@ -62,7 +62,8 @@ def connectToDatabase():
         logger.error("Failed to create writable directory")
 
     # Ensure that we have a writable location on all devices.
-    filename = "{}/chat-database.sqlite3".format(write_dir.absolutePath())
+    abs_path = write_dir.absolutePath()
+    filename = f"{abs_path}/chat-database.sqlite3"
 
     # When using the SQLite driver, open() will create the SQLite
     # database if it doesn't exist.

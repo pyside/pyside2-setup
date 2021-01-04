@@ -60,8 +60,7 @@ offending_words = {
 }
 
 utf8_line = "# This Python file uses the following encoding: utf-8\n"
-marker_line = "# It has been edited by {} .\n".format(
-                  os.path.basename(__file__))
+marker_line = f"# It has been edited by {os.path.basename(__file__)} .\n"
 
 def patch_file(fname):
     with open(fname) as f:
@@ -71,7 +70,7 @@ def patch_file(fname):
         for word, repl in offending_words.items():
             if word in line:
                 lines[idx] = line.replace(word, repl)
-                print("line:{!r} {!r}->{!r}".format(line, word, repl))
+                print(f"line:{line!r} {word!r}->{repl!r}")
     if lines[0].strip() != utf8_line.strip():
         lines[:0] = [utf8_line, "\n"]
     if lines[1] != marker_line:

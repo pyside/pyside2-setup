@@ -96,9 +96,8 @@ class SqlConversationModel(QSqlTableModel):
 
         self.recipient = recipient
 
-        filter_str = (
-            "(recipient = '{}' AND author = 'Me') OR " "(recipient = 'Me' AND author='{}')"
-        ).format(self.recipient)
+        filter_str = (f"(recipient = '{self.recipient}' AND author = 'Me') OR "
+                      f"(recipient = 'Me' AND author='{self.recipient}')")
         self.setFilter(filter_str)
         self.select()
 
@@ -136,10 +135,10 @@ class SqlConversationModel(QSqlTableModel):
         new_record.setValue("timestamp", str(timestamp))
         new_record.setValue("message", message)
 
-        logging.debug('Message: "{}" \n Received by: "{}"'.format(message, recipient))
+        logging.debug(f'Message: "{message}" \n Received by: "{recipient}"')
 
         if not self.insertRecord(self.rowCount(), new_record):
-            logging.error("Failed to send message: {}".format(self.lastError().text()))
+            logging.error("Failed to send message: {self.lastError().text()}")
             return
 
         self.submitAll()

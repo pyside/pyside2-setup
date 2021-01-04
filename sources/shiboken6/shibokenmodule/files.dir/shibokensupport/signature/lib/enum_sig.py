@@ -110,7 +110,8 @@ class ExactEnumerator(object):
             if name not in ("object", "type"):
                 name = base.__module__ + "." + name
             bases_list.append(name)
-        class_str = "{}({})".format(class_name, ", ".join(bases_list))
+        bases_str = ', '.join(bases_list)
+        class_str = f"{class_name}({bases_str})"
         # class_members = inspect.getmembers(klass)
         # gives us also the inherited things.
         class_members = sorted(list(klass.__dict__.items()))

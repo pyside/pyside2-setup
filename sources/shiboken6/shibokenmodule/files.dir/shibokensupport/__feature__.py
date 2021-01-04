@@ -117,7 +117,7 @@ def _import(name, *args, **kwargs):
             if feature in _really_all_feature_names:
                 flag |= globals()[feature]
             else:
-                raise SyntaxError("PySide feature {} is not defined".format(feature))
+                raise SyntaxError(f"PySide feature {feature} is not defined")
 
         flag |= existing & 255 if isinstance(existing, int) and existing >= 0 else 0
         pyside_feature_dict[importing_module] = flag

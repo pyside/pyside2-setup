@@ -85,7 +85,7 @@ elif os.path.exists(history_dir):
             try:
                 all_build_dir = f_contents_split[0]
             except IndexError:
-                print("Error: can't find the build dir in the given file '{}'".format(fpath))
+                print(f"Error: can't find the build dir in the given file '{fpath}'")
                 sys.exit(1)
 else:
     print(dedent("""
@@ -244,8 +244,7 @@ def generate_all():
 
 
 def __main__():
-    print("+++ generating {}. You should probably check this file in."
-          .format(get_refpath()))
+    print(f"+++ generating {get_refpath()}. You should probably check this file in.")
     generate_all()
 
 

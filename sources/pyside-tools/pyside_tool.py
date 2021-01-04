@@ -66,7 +66,8 @@ def qt_tool_wrapper(qt_tool, args):
     out, err = proc.communicate()
     if err:
         msg = err.decode("utf-8")
-        print("Error: {}\nwhile executing '{}'".format(msg, ' '.join(cmd)))
+        command = ' '.join(cmd)
+        print(f"Error: {msg}\nwhile executing '{command}'")
     sys.exit(proc.returncode)
 
 

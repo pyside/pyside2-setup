@@ -54,7 +54,7 @@ def _get_qt_dir():
                 break
         if not result:
             raise ValueError('Unable to locate Qt. Please set the environment variable QT_DIR')
-        print('Qt as determined by path search: {}'.format(result), file=sys.stderr)
+        print(f"Qt as determined by path search: {result}", file=sys.stderr)
     return result
 
 
