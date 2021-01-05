@@ -67,6 +67,7 @@
 #include <QtCore/QTextStream>
 
 static const char defaultScript[] = R"(
+import AppLib
 print("Hello, world")
 mainWindow.testFunction1()
 )";
