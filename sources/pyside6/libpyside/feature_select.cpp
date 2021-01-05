@@ -451,11 +451,11 @@ void finalize()
 }
 
 static bool patch_property_impl();
+static bool is_initialized = false;
 
 void init()
 {
     // This function can be called multiple times.
-    static bool is_initialized = false;
     if (!is_initialized) {
         fast_id_array = &_fast_id_array[1];
         for (int idx = -1; idx < 256; ++idx)
@@ -470,6 +470,14 @@ void init()
     }
     // Reset the cache. This is called at any "from __feature__ import".
     cached_globals = nullptr;
+}
+
+void Enable(bool enable)
+{
+    if (!is_initialized)
+        return;
+    featurePointer = enable ? featureProcArray : nullptr;
+    initSelectableFeature(enable ? SelectFeatureSet : nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////////////

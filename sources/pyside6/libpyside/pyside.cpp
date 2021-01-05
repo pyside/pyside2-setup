@@ -50,6 +50,7 @@
 #include "pysidemetafunction_p.h"
 #include "pysidemetafunction.h"
 #include "dynamicqmetaobject.h"
+#include "feature_select.h"
 
 #include <autodecref.h>
 #include <basewrapper.h>
@@ -285,7 +286,11 @@ void initQObjectSubType(SbkObjectType *type, PyObject *args, PyObject * /* kwds 
         qWarning("Sub class of QObject not inheriting QObject!? Crash will happen when using %s.", className.constData());
         return;
     }
+    // PYSIDE-1463: Don't change feature selection durin subtype initialization.
+    // This behavior is observed with PySide 6.
+    PySide::Feature::Enable(false);
     initDynamicMetaObject(type, userData->mo.update(), userData->cppObjSize);
+    PySide::Feature::Enable(true);
 }
 
 void initQApp()

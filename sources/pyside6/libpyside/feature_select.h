@@ -49,6 +49,7 @@ namespace Feature {
 PYSIDE_API void init();
 PYSIDE_API void Select(PyObject *obj);
 PYSIDE_API PyObject *Select(PyTypeObject *type);
+PYSIDE_API void Enable(bool);
 
 } // namespace Feature
 } // namespace PySide

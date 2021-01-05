@@ -93,9 +93,10 @@ typedef void (*ObjectDestructor)(void *);
 
 typedef void (*SubTypeInitHook)(SbkObjectType *, PyObject *, PyObject *);
 
-// PYSIDE-1019: Set the function to select the current feature.
+/// PYSIDE-1019: Set the function to select the current feature.
+/// Return value is the previous content.
 typedef PyObject *(*SelectableFeatureHook)(PyTypeObject *);
-LIBSHIBOKEN_API void initSelectableFeature(SelectableFeatureHook func);
+LIBSHIBOKEN_API SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func);
 
 // PYSIDE-1019: Get access to PySide reserved bits.
 LIBSHIBOKEN_API int SbkObjectType_GetReserved(PyTypeObject *type);

@@ -474,9 +474,11 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
 //   SbkObject_GenericSetAttr       PyObject_GenericSetAttr
 //
 
-void initSelectableFeature(SelectableFeatureHook func)
+SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
 {
+    auto ret = SelectFeatureSet;
     SelectFeatureSet = func;
+    return ret;
 }
 
 static PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
@@ -629,10 +631,13 @@ static PyObject *SbkObjectTypeTpNew(PyTypeObject *metatype, PyObject *args, PyOb
     sotp->d_func = nullptr;
     sotp->is_user_type = 1;
 
+    // PYSIDE-1463: Prevent feature switching while in the creation process
+    auto saveFeature = initSelectableFeature(nullptr);
     for (SbkObjectType *base : bases) {
         if (PepType_SOTP(base)->subtype_init)
             PepType_SOTP(base)->subtype_init(newType, args, kwds);
     }
+    initSelectableFeature(saveFeature);
     return reinterpret_cast<PyObject *>(newType);
 }
 
