@@ -6128,8 +6128,13 @@ bool CppGenerator::finishGeneration()
     // PYSIDE-510: Create a signatures string for the introspection feature.
     writeSignatureStrings(s, signatureStream.toString(), moduleName(), "global functions");
 
+    // Write module init function
+    const QString globalModuleVar = pythonModuleObjectName();
     s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
         << moduleName() << "()\n{\n" << indent;
+    // Guard against repeated invocation
+    s << "if (" << globalModuleVar << " != nullptr)\n"
+        << indent << "return " << globalModuleVar << ";\n" << outdent;
 
     ErrorCode errorCode(QLatin1String("nullptr"));
     // module inject-code target/beginning
@@ -6162,7 +6167,7 @@ bool CppGenerator::finishGeneration()
         << "PyObject *module = Shiboken::Module::create(\""  << moduleName()
         << "\", &moduledef);\n\n"
         << "// Make module available from global scope\n"
-        << pythonModuleObjectName() << " = module;\n\n"
+        << globalModuleVar << " = module;\n\n"
         << "// Initialize classes in the type system\n"
         << s_classPythonDefines.toString();
 
