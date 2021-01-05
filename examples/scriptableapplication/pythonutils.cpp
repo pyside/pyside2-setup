@@ -94,14 +94,12 @@ static const char virtualEnvVar[] = "VIRTUAL_ENV";
 // packages location.
 static void initVirtualEnvironment()
 {
-    QByteArray virtualEnvPath = qgetenv(virtualEnvVar);
     // As of Python 3.8, Python is no longer able to run stand-alone in a
     // virtualenv due to missing libraries. Add the path to the modules instead.
     if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows
         && (PY_MAJOR_VERSION > 3 || (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION >= 8))) {
+        const QByteArray virtualEnvPath = qgetenv(virtualEnvVar);
         qputenv("PYTHONPATH", virtualEnvPath + "\\Lib\\site-packages");
-    } else {
-        qputenv("PYTHONHOME", virtualEnvPath);
     }
 }
 
