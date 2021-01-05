@@ -2419,6 +2419,27 @@
     <modify-function signature="value(const QString&amp;,const QVariant&amp;)const" remove="all"/>
     <add-function signature="value(const QString&amp;, const QVariant&amp; @defaultValue@ = 0, PyObject* @type@ = 0)" return-type="PyObject*">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qsettings-value"/>
+      <inject-documentation mode="append" format="target">
+        Custom overload that adds an optional named parameter to the function ``value()``
+        to automatically cast the type that is being returned by the function.
+
+        An example of this situation could be an ini file that contains
+        the value of a one-element list::
+
+            settings.setValue('var', ['a'])
+
+        The the ini file will be::
+
+            [General]
+            var=a  # we cannot know that this is a list!
+
+        Once we read it, we could specify if we want
+        the default behavior, a str, or to cast the output
+        to a list.
+
+            settings.value('var')  # Will get "a"
+            settings.value('var', type=list)  # Will get ["a"]
+      </inject-documentation>
     </add-function>
   </object-type>
   <object-type name="QEvent"  polymorphic-id-expression="%1-&gt;type() == QEvent::None">
