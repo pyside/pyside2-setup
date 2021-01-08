@@ -38,7 +38,7 @@
 #############################################################################
 from build_scripts.options import has_option
 from build_scripts.options import option_value
-from build_scripts.utils import install_pip_dependencies
+from build_scripts.utils import install_pip_dependencies, expand_clang_variables
 from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
@@ -175,6 +175,8 @@ def run_build_instructions(phase):
 if __name__ == "__main__":
 
     # Remove some environment variables that impact cmake
+    arch = '32' if CI_TARGET_ARCH and CI_TARGET_ARCH == 'X86' else '64'
+    expand_clang_variables(arch)
     for env_var in ['CC', 'CXX']:
         if os.environ.get(env_var):
             del os.environ[env_var]

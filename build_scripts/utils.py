@@ -691,6 +691,16 @@ def find_llvm_config():
     return result
 
 
+# Expand the __ARCH_ place holder in the CLANG environment variables
+def expand_clang_variables(target_arch):
+    for var in 'LLVM_INSTALL_DIR', 'CLANG_INSTALL_DIR':
+        value = os.environ.get(var)
+        if value and '_ARCH_' in value:
+            value = value.replace('_ARCH_', target_arch)
+            os.environ[var] = value
+            print("{} = {}".format(var, value))
+
+
 # Add Clang to path for Windows for the shiboken ApiExtractor tests.
 # Revisit once Clang is bundled with Qt.
 def detect_clang():
