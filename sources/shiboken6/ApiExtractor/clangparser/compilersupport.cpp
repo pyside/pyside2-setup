@@ -248,6 +248,7 @@ static QString findClangLibDir()
             const QString path = QFile::decodeName(qgetenv(envVar)) + QLatin1String("/lib");
             if (QFileInfo::exists(path))
                 return path;
+            qWarning("%s: %s as pointed to by %s does not exist.", __FUNCTION__, qPrintable(path), envVar);
         }
     }
     const QString llvmConfig =
@@ -258,6 +259,7 @@ static QString findClangLibDir()
             const QString path = QFile::decodeName(stdOut.trimmed());
             if (QFileInfo::exists(path))
                 return path;
+            qWarning("%s: %s as returned by llvm-config does not exist.", __FUNCTION__, qPrintable(path));
         }
     }
     return QString();
@@ -270,9 +272,12 @@ static QString findClangBuiltInIncludesDir()
     if (!clangPathLibDir.isEmpty()) {
         QString candidate;
         QVersionNumber lastVersionNumber(1, 0, 0);
-        QDir clangDir(clangPathLibDir + QLatin1String("/clang"));
+        const QString clangDirName = clangPathLibDir + QLatin1String("/clang");
+        QDir clangDir(clangDirName);
         const QFileInfoList versionDirs =
             clangDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        if (versionDirs.isEmpty())
+            qWarning("%s: No subdirectories found in %s.", __FUNCTION__, qPrintable(clangDirName));
         for (const QFileInfo &fi : versionDirs) {
             const QString fileName = fi.fileName();
             if (fileName.at(0).isDigit()) {
