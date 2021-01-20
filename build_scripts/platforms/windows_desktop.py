@@ -270,7 +270,12 @@ def copy_msvc_redist_files(vars, redist_target_path):
         zip_file = "pyside_qt_deps_64_2019.7z"
         if "{target_arch}".format(**vars) == "32":
             zip_file = "pyside_qt_deps_32_2019.7z"
-        download_and_extract_7z(redist_url + zip_file, redist_target_path)
+        try:
+            download_and_extract_7z(redist_url + zip_file, redist_target_path)
+        except:
+            print("download.qt.io is down, try with mirror")
+            redist_url = "https://www.funet.fi/pub/mirrors/download.qt-project.org/development_releases/prebuilt/vcredist/"
+            download_and_extract_7z(redist_url + zip_file, redist_target_path)
     else:
         print("Qt dependency DLLs (MSVC redist) will not be downloaded and extracted.")
 
