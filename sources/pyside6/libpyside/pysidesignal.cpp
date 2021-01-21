@@ -620,17 +620,17 @@ namespace PySide {
 namespace Signal {
 
 static const char *MetaSignal_SignatureStrings[] = {
-    "PySide6.QtCore.MetaSignal.__instancecheck__(object:object)->bool",
+    "PySide6.QtCore.MetaSignal.__instancecheck__(self,object:object)->bool",
     nullptr}; // Sentinel
 
 static const char *Signal_SignatureStrings[] = {
-    "PySide6.QtCore.Signal(*types:type,name:str=nullptr,arguments:str=nullptr)",
+    "PySide6.QtCore.Signal(self,*types:type,name:str=nullptr,arguments:str=nullptr)",
     nullptr}; // Sentinel
 
 static const char *SignalInstance_SignatureStrings[] = {
-    "PySide6.QtCore.SignalInstance.connect(slot:object,type:type=nullptr)",
-    "PySide6.QtCore.SignalInstance.disconnect(slot:object=nullptr)",
-    "PySide6.QtCore.SignalInstance.emit(*args:typing.Any)",
+    "PySide6.QtCore.SignalInstance.connect(self,slot:object,type:type=nullptr)",
+    "PySide6.QtCore.SignalInstance.disconnect(self,slot:object=nullptr)",
+    "PySide6.QtCore.SignalInstance.emit(self,*args:typing.Any)",
     nullptr}; // Sentinel
 
 void init(PyObject *module)

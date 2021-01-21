@@ -183,7 +183,7 @@ namespace PySide {
 namespace Slot {
 
 static const char *Slot_SignatureStrings[] = {
-    "PySide6.QtCore.Slot(*types:type,name:str=nullptr,result:str=nullptr)->typing.Callable[...,typing.Optional[str]]",
+    "PySide6.QtCore.Slot(self,*types:type,name:str=nullptr,result:str=nullptr)->typing.Callable[...,typing.Optional[str]]",
     nullptr}; // Sentinel
 
 void init(PyObject *module)

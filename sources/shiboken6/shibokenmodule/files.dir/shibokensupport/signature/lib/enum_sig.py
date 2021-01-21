@@ -49,7 +49,7 @@ by producing a lot of clarity.
 
 import sys
 from shibokensupport.signature import inspect
-from shibokensupport.signature import get_signature
+from shibokensupport.signature import get_signature as get_sig
 
 
 class ExactEnumerator(object):
@@ -62,19 +62,30 @@ class ExactEnumerator(object):
     """
 
     def __init__(self, formatter, result_type=dict):
-        global EnumType
+        global EnumMeta
         try:
             # Lazy import
             from PySide6.QtCore import Qt
-            EnumType = type(Qt.Key)
+            EnumMeta = type(Qt.Key)
         except ImportError:
-            EnumType = None
+            EnumMeta = None
 
         self.fmt = formatter
         self.result_type = result_type
         self.fmt.level = 0
         self.fmt.after_enum = self.after_enum
         self._after_enum = False
+        self.fmt.is_method = self.is_method
+
+    def is_method(self):
+        """
+        Is this function a method?
+        We check if it is not in a sub-structure
+        """
+        func = self.func
+        if hasattr(func, "__func__"):
+            func = func.__func__
+        return func.__name__ != func.__qualname__
 
     def after_enum(self):
         ret = self._after_enum
@@ -91,7 +102,7 @@ class ExactEnumerator(object):
             self.fmt.class_name = None
             for class_name, klass in members:
                 ret.update(self.klass(class_name, klass))
-            if isinstance(klass, EnumType):
+            if isinstance(klass, EnumMeta):
                 raise SystemError("implement enum instances at module level")
             for func_name, func in functions:
                 ret.update(self.function(func_name, func))
@@ -128,10 +139,11 @@ class ExactEnumerator(object):
                 signature = getattr(thing, "__signature__", None)
                 if signature is not None:
                     functions.append((func_name, thing))
-            elif type(type(thing)) is EnumType:
-                enums.append((thing_name, thing))
+            elif type(type(thing)) is EnumMeta:
+                # take the real enum name, not what is in the dict
+                enums.append((thing_name, type(thing).__qualname__, thing))
         init_signature = getattr(klass, "__signature__", None)
-        enums.sort(key=lambda tup: tup[1])  # sort by enum value
+        enums.sort(key=lambda tup: tup[1 : 3])  # sort by class then enum value
         self.fmt.have_body = bool(subclasses or functions or enums or init_signature)
 
         with self.fmt.klass(class_name, class_str):
@@ -139,8 +151,8 @@ class ExactEnumerator(object):
             self.fmt.class_name = class_name
             if hasattr(self.fmt, "enum"):
                 # this is an optional feature
-                for enum_name, value in enums:
-                    with self.fmt.enum(class_name, enum_name, int(value)):
+                for enum_name, enum_class_name, value in enums:
+                    with self.fmt.enum(enum_class_name, enum_name, int(value)):
                         pass
             for subclass_name, subclass in subclasses:
                 if klass == subclass:
@@ -157,14 +169,18 @@ class ExactEnumerator(object):
             self.fmt.level -= 1
         return ret
 
+    @staticmethod
+    def get_signature(func):
+        return func.__signature__
+
     def function(self, func_name, func):
-        self.fmt.level += 1
+        self.func = func    # for is_method()
         ret = self.result_type()
-        signature = func.__signature__
+        signature = self.get_signature(func)
         if signature is not None:
-            with self.fmt.function(func_name, signature, modifier) as key:
+            with self.fmt.function(func_name, signature) as key:
                 ret[key] = signature
-        self.fmt.level -= 1
+        del self.func
         return ret
 
 
@@ -190,12 +206,13 @@ class SimplifyingEnumerator(ExactEnumerator):
 
     def function(self, func_name, func):
         ret = self.result_type()
-        signature = get_signature(func, 'existence')
+        signature = get_sig(func, 'existence')
         sig = stringify(signature) if signature is not None else None
         if sig is not None and func_name not in ("next", "__next__", "__div__"):
             with self.fmt.function(func_name, sig) as key:
                 ret[key] = sig
         return ret
+
 
 class HintingEnumerator(ExactEnumerator):
     """
@@ -205,11 +222,6 @@ class HintingEnumerator(ExactEnumerator):
     hinting stubs. Only default values are replaced by "...".
     """
 
-    def function(self, func_name, func):
-        ret = self.result_type()
-        signature = get_signature(func, 'hintingstub')
-        if signature is not None:
-            with self.fmt.function(func_name, signature) as key:
-                ret[key] = signature
-        return ret
-
+    @staticmethod
+    def get_signature(func):
+        return get_sig(func, "hintingstub")
