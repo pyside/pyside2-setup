@@ -987,9 +987,11 @@ CodeModel::FunctionType _FunctionModelItem::_determineTypeHelper() const
         case CodeModel::ArithmeticOperator:
             if (functionName == u"operator*")
                 return CodeModel::DereferenceOperator;
+            break;
         case CodeModel::BitwiseOperator:
             if (functionName == u"operator&")
                 return CodeModel::ReferenceOperator;
+            break;
         default:
             break;
         }
