@@ -176,7 +176,7 @@ class InheritanceGraph(object):
         if module == '__builtin__':
             fullname = cls.__name__
         else:
-            fullname = f"{module}.{cls.__qualname__)}"
+            fullname = f"{module}.{cls.__qualname__}"
         if parts == 0:
             return fullname
         name_parts = fullname.split('.')
