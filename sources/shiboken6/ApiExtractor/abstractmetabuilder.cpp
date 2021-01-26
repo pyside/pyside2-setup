@@ -2466,7 +2466,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(const ArgumentModelItem &ite
                                                     int /* argumentIndex */)
 {
     QString expr = item->defaultValueExpression();
-    if (expr.isEmpty())
+    if (expr.isEmpty() || expr == u"{}")
         return expr;
 
     if (type.isPrimitive()) {
