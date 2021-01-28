@@ -606,7 +606,7 @@ static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *
     return prop;
 }
 
-static QStringList parseFields(const char *propstr)
+static QStringList parseFields(const char *propstr, bool *stdwrite)
 {
     /*
      * Break the string into subfields at ':' and add defaults.
@@ -616,12 +616,14 @@ static QStringList parseFields(const char *propstr)
     assert(list.size() == 2 || list.size() == 3);
     auto name = list[0];
     auto read = list[1];
-    if (read.size() == 0)
+    if (read.isEmpty())
         list[1] = name;
     if (list.size() == 2)
         return list;
     auto write = list[2];
-    if (write.size() == 0) {
+    if (stdwrite)
+        *stdwrite = write.isEmpty();
+    if (write.isEmpty()) {
         list[2] = QLatin1String("set") + name;
         list[2][3] = list[2][3].toUpper();
     }
@@ -661,8 +663,9 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
     if (props == nullptr || *props == nullptr)
         return true;
     for (; *props != nullptr; ++props) {
+        bool isStdWrite;
         auto propstr = *props;
-        auto fields = parseFields(propstr);
+        auto fields = parseFields(propstr, &isStdWrite);
         bool haveWrite = fields.size() == 3;
         PyObject *name = make_snake_case(fields[0], lower);
         PyObject *read = make_snake_case(fields[1], lower);
@@ -685,9 +688,10 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
                 return false;
         // Theoretically, we need to check for multiple signatures to be exact.
         // But we don't do so intentionally because it would be confusing.
-        if (haveWrite && PyDict_GetItem(prop_dict, write))
+        if (haveWrite && PyDict_GetItem(prop_dict, write) && isStdWrite) {
             if (PyDict_DelItem(prop_dict, write) < 0)
                 return false;
+        }
     }
     return true;
 }
