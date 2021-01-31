@@ -49,21 +49,18 @@ the addresses of objects do not compare well.
 
 Input format:
 -------------
-The Python output lines are of this format:
+The Python output lines can be freely formatted.
 
-mode filename:lineno funcname object_id typename object_refcount
-
-Mode can be "INC", "DEC", "XINC", XDEC", "NEW, "NEWV".
-
-On "NEW" or "NEWV", an object is created and the refcount is always 1.
-On "DEC" or "XDEC", when refcount is 0, the object is deleted.
+Any line which contains "0x.." followed by some name will be changed,
+all others are left alone.
+We name these fields `object_id` and `typename`.
 
 
 Operation
 ---------
 
 The script reads from <stdin> until EOF. It produces output where the
-object_id field is removed and some text is combined with object_typename
+`object_id` field is removed and some text is combined with `typename`
 to produce a unique object name.
 
 
@@ -81,42 +78,42 @@ This is work in flux that might change quite often.
 To Do List
 ----------
 
-The script should be re-worked to be more flexible, without relying on
-the number of coulumns but with some intelligent guessing.
-
 Names of objects which are already deleted should be monitored and
 not by chance be re-used.
 """
 
+import re
 import sys
 from collections import OrderedDict
 
 
-def make_name(type_name, name_pos):
+def make_name(typename, name_pos):
     """
     Build a name by using uppercase letters and numbers
     """
     if name_pos < 26:
         name = chr(ord("A") + name_pos)
-        return f"{type_name}_{name}"
-    return f"{type_name}_{str(name_pos)}"
+        return f"{typename}_{name}"
+    return f"{typename}_{str(name_pos)}"
 
 
-mode_tokens = "NEW NEWV INC DEC XINC XDEC".split()
 known_types = {}
+pattern = r"0x\w+\s+\S+"    # hex word followed by non-WS
+rex = re.compile(pattern, re.IGNORECASE)
 
-while 1:
+while True:
     line = sys.stdin.readline()
     if not line:
         break
-    fields = line.split()
-    if len(fields) != 6 or fields[0] not in mode_tokens:
+    if not (res := rex.search(line)):
         print(line.rstrip())
         continue
-    mode, fname_lno, funcname, object_id, typename, refcount = fields
+    start_pos, end_pos = res.start(), res.end()
+    beg, mid, end = line[:start_pos], line[start_pos : end_pos], line[end_pos:].rstrip()
+    object_id, typename = mid.split()
     if typename not in known_types:
         known_types[typename] = OrderedDict()
     obj_store = known_types[typename]
     if object_id not in obj_store:
         obj_store[object_id] = make_name(typename, len(obj_store))
-    print(f"{mode} {fname_lno} {funcname} {obj_store[object_id]} {refcount}")
+    print(f"{beg}{obj_store[object_id]}{end}")
