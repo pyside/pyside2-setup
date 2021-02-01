@@ -68,7 +68,7 @@ struct SourceLocation
 {
     bool equals(const SourceLocation &rhs) const;
 
-    CXFile file;
+    CXFile file = nullptr;
     unsigned line = 0;
     unsigned column = 0;
     unsigned offset = 0;
@@ -96,10 +96,14 @@ struct Diagnostic {
     static Diagnostic fromCXDiagnostic(CXDiagnostic cd);
     // Other
     explicit Diagnostic(const QString &m, const CXCursor &c, CXDiagnosticSeverity s = CXDiagnostic_Warning);
+    void setLocation(const SourceLocation &);
 
     QString message;
     QStringList childMessages;
-    SourceLocation location;
+    QString file;
+    unsigned line = 0;
+    unsigned column = 0;
+    unsigned offset = 0;
     Source source = Clang;
     CXDiagnosticSeverity severity = CXDiagnostic_Warning;
 };

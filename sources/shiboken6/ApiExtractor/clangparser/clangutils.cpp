@@ -139,8 +139,9 @@ QString getTypeName(const CXType &type)
 }
 
 Diagnostic::Diagnostic(const QString &m, const CXCursor &c, CXDiagnosticSeverity s)
-    : message(m), location(getCursorLocation(c)), source(Other), severity(s)
+    : message(m), source(Other), severity(s)
 {
+    setLocation(getCursorLocation(c));
 }
 
 Diagnostic Diagnostic::fromCXDiagnostic(CXDiagnostic cd)
@@ -151,7 +152,7 @@ Diagnostic Diagnostic::fromCXDiagnostic(CXDiagnostic cd)
     result.message = QString::fromUtf8(clang_getCString(spelling));
     clang_disposeString(spelling);
     result.severity = clang_getDiagnosticSeverity(cd);
-    result.location = getExpansionLocation(clang_getDiagnosticLocation(cd));
+    result.setLocation(getExpansionLocation(clang_getDiagnosticLocation(cd)));
 
     CXDiagnosticSet childDiagnostics = clang_getChildDiagnostics(cd);
     if (const unsigned childCount = clang_getNumDiagnosticsInSet(childDiagnostics)) {
@@ -167,6 +168,14 @@ Diagnostic Diagnostic::fromCXDiagnostic(CXDiagnostic cd)
     }
 
     return result;
+}
+
+void Diagnostic::setLocation(const SourceLocation &sourceLocation)
+{
+    file = getFileName(sourceLocation.file);
+    line = sourceLocation.line;
+    column = sourceLocation.column;
+    offset = sourceLocation.offset;
 }
 
 QList<Diagnostic> getDiagnostics(CXTranslationUnit tu)
@@ -249,7 +258,7 @@ QDebug operator<<(QDebug s, const Diagnostic &d)
     QDebugStateSaver saver(s);
     s.nospace();
     s.noquote();
-    s << d.location << ": ";
+    s << d.file << ':'<< d.line << ':' << d.column << ": ";
     switch (d.severity) {
     case CXDiagnostic_Ignored:
         s << "ignored";
