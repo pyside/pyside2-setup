@@ -298,12 +298,13 @@ PyObject *BindingManager::getOverride(const void *cptr,
         // They cannot be overridden (make that sure by the metaclass).
         return nullptr;
     }
-    PyObject *pyMethodName = nameCache[(flag & 1) != 0];  // borrowed
+    bool is_snake = flag & 0x01;
+    PyObject *pyMethodName = nameCache[is_snake];  // borrowed
     if (pyMethodName == nullptr) {
         if (propFlag)
             methodName += 2;    // skip the propFlag and ':'
-        pyMethodName = Shiboken::String::getSnakeCaseName(methodName, flag);
-        nameCache[(flag & 1) != 0] = pyMethodName;
+        pyMethodName = Shiboken::String::getSnakeCaseName(methodName, is_snake);
+        nameCache[is_snake] = pyMethodName;
     }
 
     if (wrapper->ob_dict) {
