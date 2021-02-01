@@ -64,7 +64,7 @@ since all the changes will be cached in the model until you do so.
 
    .. literalinclude:: sqlDialog.py
       :linenos:
-      :lines: 130-146
+      :lines: 130-145
 
 chat.qml
 --------
