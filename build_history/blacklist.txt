@@ -11,6 +11,7 @@
     darwin
     win32
 [Qt3DExtras::qt3dextras_test]
+    win32 ci
     linux
     darwin
 [QtCore::qfile_test]
