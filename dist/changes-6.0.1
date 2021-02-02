@@ -1,0 +1,48 @@
+Qt for Python 6.0.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-454]  Remove rejection of namespace std in Qt bindings
+ - [PYSIDE-510]  signature: Fix the parser regex for Qt6
+ - [PYSIDE-841]  scriptable application/Unix: Remove setting of PYTHONHOME
+                 for virtualenv
+ - [PYSIDE-841]  scriptable application: Actually expose the generated
+                 module
+ - [PYSIDE-1019] feature: delete setter after creating property only for
+                 standard naming
+ - [PYSIDE-1019] feature: Fix a flag error when no snake_case is selected
+ - [PYSIDE-1447] qApp: fix flag handling in Python 3.8+ and a Python 3.9
+                 issue
+ - [PYSIDE-1449] PySide6: Add QTestlib's QAbstractItemModelTester
+ - [PYSIDE-1456] designer: add rpath for linux
+ - [PYSIDE-1460] signature: Fix infinite loop changing up directories on
+                 Windows shares
+ - [PYSIDE-1463] feature: Disable selection while creating a type
+ - [PYSIDE-1466] QSetting.value add overload documentation
+ - [PYSIDE-1469] build_scripts: fix get_config_var for Big Sur
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-487]  Guard against repeated invocation of the module
+                 init function
+ - [PYSIDE-1448] Fix code injected at target/end being invoked for
+                 several overload ids
+ - [PYSIDE-1470] Allow to use shiboken.delete() to delete Q*Application
+
