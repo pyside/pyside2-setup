@@ -8,4 +8,4 @@ sphinx
 six
 wheel>=0.35
 PyOpenGL
-pyinstaller==3.6
+pyinstaller==5.13.1
